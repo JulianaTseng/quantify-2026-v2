@@ -1,666 +1,1108 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QS SMART AI - quantify team</title>
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- PDF.js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <style>
-    :root { --blue-primary: #004AAD; --bg-main: #f4f7fa; }
-    body { background: var(--bg-main); color: #1e293b; font-family: system-ui, -apple-system, sans-serif; }
-    .card { background: white; border: 1px solid #d4e3f0; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0, 74, 173, 0.04); }
-    .tab { padding: 12px 18px; border-bottom: 3px solid transparent; font-weight: 600; font-size: 13px; color: #64748b; cursor: pointer; white-space: nowrap; transition: 0.2s; }
-    .tab:hover { color: var(--blue-primary); }
-    .tab.active { border-color: var(--blue-primary); color: var(--blue-primary); background: #CBE6F7; }
-    .section { display: none; }
-    .section.active { display: block; }
-    .btn { padding: 8px 14px; border-radius: 8px; background: var(--blue-primary); color: white; font-size: 12px; font-weight: 700; cursor: pointer; transition: 0.2s; border: none; }
-    .btn:hover { background: #00337a; }
-    .btn.secondary { background: #fff; color: var(--blue-primary); border: 1px solid var(--blue-primary); }
-    .btn.secondary:hover { background: #CBE6F7; }
-    .input { width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; outline: none; }
-    .input:focus { border-color: var(--blue-primary); box-shadow: 0 0 0 2px #CBE6F7; }
-    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; }
-    .modal { background: white; border-radius: 12px; width: 100%; max-width: 500px; padding: 24px; }
-    /* Accordion for VOs */
-    details { border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 10px; background: #fff; }
-    summary { padding: 12px 16px; font-weight: 600; cursor: pointer; background: #f8fafc; border-radius: 8px; list-style: none; display: flex; justify-content: space-between; align-items: center; }
-    summary::-webkit-details-marker { display: none; }
-    details[open] summary { border-bottom: 1px solid #e2e8f0; border-radius: 8px 8px 0 0; }
-    .detail-content { padding: 16px; font-size: 13px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QS SMART AI — by quantify team</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          brand: { DEFAULT: '#004AAD', dark: '#003B8A', light: '#E8F0FB' }
+        }
+      }
+    }
+  };
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+  summary::-webkit-details-marker { display: none; }
+  details[open] .chev { transform: rotate(90deg); }
+  html { scroll-behavior: smooth; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+</style>
 </head>
-<body>
+<body class="bg-slate-50 min-h-screen antialiased text-slate-800">
 
-<header class="bg-white border-b sticky top-0 z-30 shadow-sm">
-  <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
-    <div class="flex items-center gap-3 cursor-pointer" onclick="goHome()">
-      <div class="bg-[#004AAD] text-white font-black px-3 py-1.5 rounded-lg text-lg tracking-wider">QS</div>
-      <div>
-        <h1 class="text-xl font-extrabold text-[#004AAD]">QS SMART AI</h1>
-        <p class="text-xs text-slate-500">by quantify team</p>
-      </div>
-    </div>
-    <div class="flex gap-2">
-      <button class="btn secondary" onclick="openSettingsModal()">⚙️ API Settings</button>
-    </div>
+<!-- ============ GLOBAL HEADER ============ -->
+<header class="bg-brand text-white sticky top-0 z-40 shadow-md">
+  <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+    <button onclick="goHome()" class="flex items-center gap-3 text-left">
+      <span class="w-9 h-9 rounded-lg bg-white/15 grid place-items-center font-bold text-sm">QS</span>
+      <span class="leading-tight">
+        <span class="block font-semibold tracking-wide">QS SMART AI</span>
+        <span class="block text-[10px] text-white/70">by quantify team</span>
+      </span>
+    </button>
+    <button onclick="openSettings()" class="flex items-center gap-2 text-sm bg-white/10 hover:bg-white/20 px-3 py-2 rounded-lg transition" title="API Settings">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+      <span class="hidden sm:inline">API Settings</span>
+    </button>
   </div>
-  <!-- Main Nav Tabs (Only show in project view) -->
-  <nav id="mainNav" class="max-w-7xl mx-auto px-4 flex overflow-x-auto border-t border-slate-100 hidden">
-    <button class="tab active" data-tab="tab1" onclick="switchTab('tab1')">1. Doc Reader & Classification</button>
-    <button class="tab" data-tab="tab2" onclick="switchTab('tab2')">2. Key Dates & Clauses</button>
-    <button class="tab" data-tab="tab3" onclick="switchTab('tab3')">3. VO & SOP Timer</button>
-    <button class="tab" data-tab="tab4" onclick="switchTab('tab4')">4. VO Organizer</button>
-    <button class="tab" data-tab="tab5" onclick="switchTab('tab5')">5. GCC/SCC Check & Calc</button>
-  </nav>
 </header>
 
-<main class="max-w-7xl mx-auto p-4 pt-6" id="appContainer">
-  <!-- Dynamic Content Rendered Here -->
+<main>
+  <!-- ============ VIEW: HOME ============ -->
+  <section id="view-home" class="max-w-7xl mx-auto px-4 py-8">
+    <div class="flex items-end justify-between gap-4 mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-slate-900">Projects</h1>
+        <p class="text-sm text-slate-500 mt-1">Each project keeps its own documents, AI analysis and VO records.</p>
+      </div>
+      <button onclick="openNewProject()" class="shrink-0 bg-brand hover:bg-brand-dark text-white text-sm font-semibold px-4 py-2.5 rounded-lg shadow-sm transition">
+        + New Project
+      </button>
+    </div>
+    <div id="projectGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+  </section>
+
+  <!-- ============ VIEW: WORKSPACE ============ -->
+  <section id="view-workspace" class="hidden max-w-7xl mx-auto px-4 py-6">
+    <div class="flex items-center gap-3 mb-5 flex-wrap">
+      <button onclick="goHome()" class="text-sm text-slate-600 hover:text-brand border border-slate-200 bg-white px-3 py-2 rounded-lg transition">← Projects</button>
+      <h1 id="projTitle" class="text-xl font-bold text-slate-900"></h1>
+      <span id="projMeta" class="text-xs text-slate-500"></span>
+    </div>
+    <div id="tabBar" class="flex gap-2 overflow-x-auto pb-1 mb-5"></div>
+    <div id="panelHost"></div>
+  </section>
 </main>
 
-<div id="modalContainer"></div>
+<!-- ============ MODAL: API SETTINGS ============ -->
+<div id="modalSettings" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6">
+    <div class="flex items-start justify-between mb-1">
+      <h2 class="text-lg font-bold text-slate-900">API Settings</h2>
+      <button onclick="closeSettings()" class="text-slate-400 hover:text-slate-700 text-2xl leading-none -mt-1">×</button>
+    </div>
+    <p class="text-xs text-slate-500 mb-4">Any OpenAI-compatible endpoint (DeepSeek, Moyu proxy, OpenAI…). Stored locally in your browser only.</p>
+
+    <label class="block text-xs font-semibold text-slate-600 mb-1">Endpoint URL</label>
+    <input id="setEndpoint" type="text" placeholder="https://api.deepseek.com/v1"
+      class="w-full mb-3 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+
+    <label class="block text-xs font-semibold text-slate-600 mb-1">API Key</label>
+    <input id="setApiKey" type="password" placeholder="sk-..."
+      class="w-full mb-3 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+
+    <label class="block text-xs font-semibold text-slate-600 mb-1">Model Name</label>
+    <input id="setModel" type="text" placeholder="deepseek-chat"
+      class="w-full mb-3 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+
+    <div id="testResult" class="text-xs mb-3 min-h-[1rem]"></div>
+
+    <div class="flex items-center gap-2">
+      <button onclick="testConnection()" class="text-sm px-3 py-2 rounded-lg border border-slate-300 hover:bg-slate-50 transition">Test Connection</button>
+      <div class="ml-auto flex gap-2">
+        <button onclick="closeSettings()" class="text-sm px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">Cancel</button>
+        <button onclick="saveSettings()" class="text-sm px-4 py-2 rounded-lg bg-brand text-white font-semibold hover:bg-brand-dark transition">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: NEW PROJECT ============ -->
+<div id="modalNewProject" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+  <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6">
+    <h2 class="text-lg font-bold text-slate-900 mb-1">New Project</h2>
+    <p class="text-xs text-slate-500 mb-4">e.g. “Contract 1234 – Hospital Extension”.</p>
+    <input id="newProjName" type="text" placeholder="Project name"
+      class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+    <div class="flex justify-end gap-2">
+      <button onclick="closeNewProject()" class="text-sm px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">Cancel</button>
+      <button onclick="confirmNewProject()" class="text-sm px-4 py-2 rounded-lg bg-brand text-white font-semibold hover:bg-brand-dark transition">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TOAST ============ -->
+<div id="toast" class="hidden"></div>
 
 <script>
-// Setup PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+/* =========================================================
+   QS SMART AI — pure frontend SPA (no routing, no backend)
+   ========================================================= */
 
-// ==========================================
-// 1. State Management
-// ==========================================
-let state = {
-  view: 'home', 
-  projects: JSON.parse(localStorage.getItem('qs_projects')) || [
-    { id: 'p1', name: 'Zung Fu Retail Project', contract: 'Enabling Works', ref: 'W/114105' },
-    { id: 'p2', name: 'Hospital Extension Phase 2', contract: 'Main Building Works', ref: 'W/998822' }
-  ],
-  currentProject: null,
-  activeTab: 'tab1',
-  files: [], // { name, text, pages }
-  aiData: null, // Structured JSON from AI
-  isAnalyzing: false
+const LS_PROJECTS = 'qssmart_projects_v1';
+const LS_SETTINGS = 'qssmart_settings_v1';
+
+const state = {
+  projects: [],
+  settings: { endpoint: '', apiKey: '', model: 'deepseek-chat' },
+  currentId: null,
+  tab: 'doc',
+  sopPeriod: 30,
+  busy: false
 };
 
-function saveProjects() { localStorage.setItem('qs_projects', JSON.stringify(state.projects)); }
-function loadCfg() { try { return JSON.parse(localStorage.getItem('qs_cfg') || '{}'); } catch { return {}; } }
-const $ = id => document.getElementById(id);
-const $$ = selector => document.querySelectorAll(selector);
+const TABS = [
+  { key: 'doc',       label: '1 · Documents' },
+  { key: 'dates',     label: '2 · Key Dates & Clauses' },
+  { key: 'timer',     label: '3 · VO & SOP Timer' },
+  { key: 'organizer', label: '4 · VO Organizer' },
+  { key: 'check',     label: '5 · GCC/SCC & Calculator' }
+];
 
-// ==========================================
-// 2. Routing & Rendering
-// ==========================================
-function render() {
-  const nav = $('mainNav');
-  if (state.view === 'home') {
-    nav.classList.add('hidden');
-    renderHome();
-  } else {
-    nav.classList.remove('hidden');
-    renderProject();
+const TYPE_COLORS = {
+  GCC: 'bg-blue-100 text-blue-700',
+  SCC: 'bg-indigo-100 text-indigo-700',
+  VO:  'bg-amber-100 text-amber-700',
+  AI:  'bg-purple-100 text-purple-700',
+  Other: 'bg-slate-100 text-slate-600'
+};
+
+/* ---------------- utils ---------------- */
+const $  = (s, r = document) => r.querySelector(s);
+const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+const esc = (s = '') => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+function fmtDate(s) {
+  if (!s) return '—';
+  const d = new Date(s);
+  if (isNaN(d)) return esc(String(s));
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' });
+}
+function parseDate(s) {
+  if (!s) return null;
+  const d = new Date(s);
+  return isNaN(d) ? null : d;
+}
+function utcToday() {
+  const n = new Date();
+  return Date.UTC(n.getFullYear(), n.getMonth(), n.getDate());
+}
+function fmtBytes(n) {
+  if (!n && n !== 0) return '';
+  if (n < 1024) return n + ' B';
+  if (n < 1048576) return (n / 1024).toFixed(1) + ' KB';
+  return (n / 1048576).toFixed(1) + ' MB';
+}
+function badge(label, cls) {
+  const map = {
+    emerald: 'bg-emerald-100 text-emerald-700',
+    rose:    'bg-rose-100 text-rose-700',
+    amber:   'bg-amber-100 text-amber-700',
+    slate:   'bg-slate-100 text-slate-600',
+    blue:    'bg-blue-100 text-blue-700'
+  };
+  return `<span class="inline-block text-[11px] font-semibold px-2 py-0.5 rounded-full ${map[cls] || map.slate}">${esc(label)}</span>`;
+}
+function emptyState(icon, title, sub) {
+  return `<div class="text-center py-10 px-4">
+    <div class="text-3xl mb-2">${icon}</div>
+    <p class="font-medium text-slate-700">${esc(title)}</p>
+    <p class="text-sm text-slate-400 mt-1">${esc(sub)}</p>
+  </div>`;
+}
+
+let toastTimer;
+function toast(msg, type = 'info') {
+  const el = $('#toast');
+  const colors = { ok: 'bg-emerald-600', warn: 'bg-amber-500', error: 'bg-rose-600', info: 'bg-slate-800' };
+  el.className = `fixed bottom-5 left-1/2 -translate-x-1/2 z-[100] text-white text-sm px-4 py-2.5 rounded-lg shadow-lg max-w-[90vw] ${colors[type] || colors.info}`;
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.add('hidden'), 5000);
+}
+
+/* ---------------- persistence ---------------- */
+function loadState() {
+  try {
+    const p = JSON.parse(localStorage.getItem(LS_PROJECTS) || '[]');
+    if (Array.isArray(p)) state.projects = p;
+  } catch (e) { console.warn('projects load failed', e); }
+  try {
+    const s = JSON.parse(localStorage.getItem(LS_SETTINGS) || '{}');
+    state.settings = Object.assign({ endpoint: '', apiKey: '', model: 'deepseek-chat' }, s);
+  } catch (e) { console.warn('settings load failed', e); }
+}
+
+function saveProjects() {
+  try {
+    localStorage.setItem(LS_PROJECTS, JSON.stringify(state.projects));
+    return true;
+  } catch (e) {
+    // Quota exceeded → retry without the heavy extracted text
+    try {
+      const stripped = state.projects.map(p => ({ ...p, files: (p.files || []).map(f => ({ ...f, text: '' })) }));
+      localStorage.setItem(LS_PROJECTS, JSON.stringify(stripped));
+      toast('Storage limit reached — extracted text was not persisted. Re-upload after refresh.', 'warn');
+    } catch (e2) {
+      toast('Could not save: browser storage is full.', 'error');
+    }
+    return false;
   }
 }
 
-function goHome() { state.view = 'home'; state.currentProject = null; state.files = []; state.aiData = null; render(); }
+function currentProject() {
+  return state.projects.find(p => p.id === state.currentId) || null;
+}
+function touch(p) { p.updatedAt = Date.now(); }
 
-function openProject(id) {
-  state.currentProject = state.projects.find(p => p.id === id);
-  state.view = 'project';
-  state.files = [];
-  state.aiData = null;
-  state.activeTab = 'tab1';
-  switchTab('tab1');
+/* ---------------- render root ---------------- */
+function render() {
+  if (state.currentId) {
+    $('#view-home').classList.add('hidden');
+    $('#view-workspace').classList.remove('hidden');
+    renderWorkspace();
+  } else {
+    $('#view-workspace').classList.add('hidden');
+    $('#view-home').classList.remove('hidden');
+    renderHome();
+  }
+}
+
+function renderHome() {
+  const grid = $('#projectGrid');
+  if (!state.projects.length) {
+    grid.innerHTML = `<div class="col-span-full">${emptyState('🗂️', 'No projects yet', 'Create your first project to start analysing contracts and VOs.')}</div>`;
+    return;
+  }
+  grid.innerHTML = state.projects.map(p => `
+    <div class="group relative bg-white rounded-xl border border-slate-200 p-5 hover:shadow-lg hover:border-brand/40 transition cursor-pointer"
+         onclick="openProject('${p.id}')">
+      <div class="flex items-start justify-between">
+        <div class="w-10 h-10 rounded-lg bg-brand-light grid place-items-center text-brand font-bold text-sm">
+          ${esc((p.name || 'P').replace(/[^A-Za-z0-9]/g, '').slice(0, 2).toUpperCase() || 'QS')}
+        </div>
+        <button onclick="deleteProject(event,'${p.id}')"
+          class="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-rose-600 transition text-sm px-2 py-1 rounded hover:bg-rose-50"
+          title="Delete project">✕</button>
+      </div>
+      <h3 class="mt-3 font-semibold text-slate-900 truncate">${esc(p.name)}</h3>
+      <p class="text-xs text-slate-500 mt-1">${(p.files || []).length} file(s) · ${p.analysis ? 'Analyzed' : 'Not analyzed'}</p>
+      <p class="text-[11px] text-slate-400 mt-3">Updated ${new Date(p.updatedAt || p.createdAt).toLocaleDateString('en-GB')}</p>
+    </div>`).join('');
+}
+
+function renderWorkspace() {
+  const p = currentProject();
+  if (!p) { state.currentId = null; render(); return; }
+
+  $('#projTitle').textContent = p.name;
+  $('#projMeta').textContent = `${(p.files || []).length} file(s) · ` +
+    (p.analysis ? 'Analyzed ' + new Date(p.analyzedAt).toLocaleString('en-GB') : 'Not analyzed yet');
+
+  $('#tabBar').innerHTML = TABS.map(t => `
+    <button onclick="switchTab('${t.key}')"
+      class="whitespace-nowrap px-3.5 py-2 rounded-lg text-sm font-medium transition
+      ${state.tab === t.key
+        ? 'bg-brand text-white shadow-sm'
+        : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}">${t.label}</button>`).join('');
+
+  $('#panelHost').innerHTML = renderPanel(state.tab, p);
+  bindPanel();
+}
+
+function switchTab(key) { state.tab = key; renderWorkspace(); }
+function openProject(id) { state.currentId = id; state.tab = 'doc'; render(); }
+function goHome() { state.currentId = null; state.tab = 'doc'; render(); }
+
+/* ---------------- project CRUD ---------------- */
+function openNewProject() {
+  $('#newProjName').value = '';
+  $('#modalNewProject').classList.remove('hidden');
+  setTimeout(() => $('#newProjName').focus(), 50);
+}
+function closeNewProject() { $('#modalNewProject').classList.add('hidden'); }
+function confirmNewProject() {
+  const name = ($('#newProjName').value || '').trim() || 'Untitled Project';
+  const p = {
+    id: uid(), name, createdAt: Date.now(), updatedAt: Date.now(),
+    files: [], analysis: null, analyzedAt: null
+  };
+  state.projects.unshift(p);
+  saveProjects();
+  closeNewProject();
+  state.currentId = p.id;
+  state.tab = 'doc';
+  render();
+}
+function deleteProject(e, id) {
+  e.stopPropagation();
+  if (!confirm('Delete this project and all of its saved data?')) return;
+  state.projects = state.projects.filter(p => p.id !== id);
+  if (state.currentId === id) state.currentId = null;
+  saveProjects();
   render();
 }
 
-function switchTab(tabId) {
-  state.activeTab = tabId;
-  $$('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
-  $$('.section').forEach(s => s.classList.toggle('active', s.id === tabId));
+/* ---------------- panel dispatch ---------------- */
+function renderPanel(tab, p) {
+  switch (tab) {
+    case 'doc':       return panelDoc(p);
+    case 'dates':     return panelDates(p);
+    case 'timer':     return panelTimer(p);
+    case 'organizer': return panelOrganizer(p);
+    case 'check':     return panelCheck(p);
+    default:          return panelDoc(p);
+  }
 }
 
-// --- Homepage ---
-function renderHome() {
-  const cards = state.projects.map(p => `
-    <div class="card cursor-pointer hover:border-[#004AAD] transition border-2 border-transparent" onclick="openProject('${p.id}')">
-      <h3 class="font-bold text-lg text-slate-800">${p.name}</h3>
-      <p class="text-xs text-slate-500 mt-1">${p.contract || 'No contract info'}</p>
-      <p class="text-xs text-[#004AAD] font-mono mt-2">${p.ref || ''}</p>
-    </div>
-  `).join('');
-
-  $('appContainer').innerHTML = `
-    <div class="mb-6">
-      <h2 class="text-2xl font-bold text-slate-900">Projects</h2>
-      <p class="text-sm text-slate-500">Select a project to upload documents and extract key information.</p>
-    </div>
-    <div class="grid md:grid-cols-3 gap-4">
-      ${cards}
-      <div class="card border-dashed border-2 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 text-slate-500 min-h-[120px]" onclick="openNewProjectModal()">
-        <span class="text-3xl mb-2">+</span>
-        <span class="font-bold text-sm">New project</span>
-      </div>
-    </div>
-  `;
+function noAnalysis() {
+  return `<div class="bg-white rounded-xl border border-slate-200">
+    ${emptyState('🤖', 'No analysis yet', 'Go to Tab 1, upload your documents and click “Analyze with AI”.')}
+  </div>`;
 }
 
-// --- Project View ---
-function renderProject() {
-  const p = state.currentProject;
-  $('appContainer').innerHTML = `
-    <div class="mb-6 flex justify-between items-end">
-      <div>
-        <button class="text-xs text-slate-500 hover:text-[#004AAD] mb-2 font-bold" onclick="goHome()">← Back to Projects</button>
-        <h2 class="text-2xl font-bold text-slate-900">${p.name}</h2>
-        <p class="text-sm text-slate-500">${p.contract || ''} ${p.ref ? '· ' + p.ref : ''}</p>
+/* ================= TAB 1: DOC READER & CLASSIFICATION ================= */
+function fileRow(f) {
+  const statusMap = {
+    reading: 'text-amber-600',
+    ready:   'text-emerald-600',
+    error:   'text-rose-600'
+  };
+  const label = f.status === 'reading' ? (f.progress || 'Reading…')
+              : f.status === 'error'  ? (f.progress || 'Failed')
+              : (f.progress || 'Ready');
+
+  return `<div class="flex items-center gap-3 p-3 rounded-lg border border-slate-200 bg-white">
+    <div class="w-8 h-8 rounded bg-slate-100 grid place-items-center text-xs font-bold text-slate-500 shrink-0">
+      ${/\.pdf$/i.test(f.name) ? 'PDF' : 'TXT'}
+    </div>
+    <div class="min-w-0 flex-1">
+      <div class="text-sm font-medium text-slate-800 truncate">${esc(f.name)}</div>
+      <div class="text-[11px] text-slate-400">
+        ${fmtBytes(f.size)} · <span data-file-status="${f.id}" class="${statusMap[f.status] || 'text-slate-400'}">${esc(label)}</span>
       </div>
-      <div class="flex gap-2">
-        <button class="btn secondary" onclick="refreshProject()">🔄 Clear Project Files</button>
+    </div>
+    <button onclick="removeFile('${f.id}')" class="text-slate-300 hover:text-rose-600 transition text-lg leading-none px-1" title="Remove">×</button>
+  </div>`;
+}
+
+function docCard(d) {
+  const t = (d.type || 'Other').toUpperCase();
+  return `<div class="p-3 rounded-lg border border-slate-200 bg-slate-50/60">
+    <div class="flex items-center gap-2">
+      <span class="text-[10px] font-bold px-2 py-0.5 rounded shrink-0 ${TYPE_COLORS[t] || TYPE_COLORS.Other}">${esc(t)}</span>
+      <span class="text-sm font-medium text-slate-800 break-all">${esc(d.name || 'Untitled')}</span>
+    </div>
+    <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">${esc(d.summary || '')}</p>
+  </div>`;
+}
+
+function panelDoc(p) {
+  const files = p.files || [];
+  const a = p.analysis;
+  const counts = {};
+  ((a && a.documents) || []).forEach(d => {
+    const t = (d.type || 'Other').toUpperCase();
+    counts[t] = (counts[t] || 0) + 1;
+  });
+
+  return `
+  <div class="grid lg:grid-cols-2 gap-5">
+    <div class="bg-white rounded-xl border border-slate-200 p-5">
+      <h2 class="font-semibold text-slate-800">1. Upload documents</h2>
+      <p class="text-xs text-slate-500 mt-1 mb-4">PDF / TXT. Text is extracted locally in your browser — nothing leaves your device until you run the AI analysis.</p>
+
+      <div id="dropzone" tabindex="0"
+        class="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center cursor-pointer hover:border-brand hover:bg-brand-light/50 transition outline-none focus:border-brand">
+        <div class="text-3xl mb-2">📄</div>
+        <p class="text-sm text-slate-600"><span class="text-brand font-semibold">Click to browse</span> or drag &amp; drop</p>
+        <p class="text-xs text-slate-400 mt-1">Multiple files supported</p>
+        <input id="fileInput" type="file" multiple accept=".pdf,.txt,application/pdf,text/plain" class="hidden">
+      </div>
+
+      <div class="mt-4 space-y-2">
+        ${files.length ? files.map(fileRow).join('') : '<p class="text-sm text-slate-400 py-2">No documents uploaded yet.</p>'}
       </div>
     </div>
 
-    <!-- TAB 1: Upload & Reader -->
-    <section id="tab1" class="section ${state.activeTab === 'tab1' ? 'active' : ''}">
-      <div class="grid lg:grid-cols-3 gap-6">
-        <div class="card border-2 border-dashed border-[#004AAD] text-center py-10 cursor-pointer" onclick="$('fileInput').click()">
-          <div class="text-4xl mb-2">📄</div>
-          <b class="text-sm text-slate-800">Click to upload PDF/TXT</b>
-          <p class="text-xs text-slate-500 mt-1">Upload GCC, SCC, VO, and AI docs.</p>
-          <input type="file" id="fileInput" class="hidden" accept=".pdf,.txt" multiple onchange="handleFiles(this.files)">
+    <div class="bg-white rounded-xl border border-slate-200 p-5">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <h2 class="font-semibold text-slate-800">2. AI classification</h2>
+          <p class="text-xs text-slate-500 mt-1">Splits the bundle into Contract Docs (GCC / SCC) and VO / AI supporting documents.</p>
         </div>
-        <div class="card lg:col-span-2 flex flex-col justify-between">
-          <div>
-            <div class="flex justify-between items-center border-b pb-2 mb-3">
-              <h3 class="font-bold text-sm text-slate-800">Loaded Documents</h3>
-              <span class="bg-[#CBE6F7] text-[#004AAD] px-2 py-0.5 rounded text-xs font-bold" id="fileCount">0 files</span>
+        <button id="analyzeBtn" onclick="analyzeProject()" ${state.busy ? 'disabled' : ''}
+          class="shrink-0 text-sm font-semibold px-4 py-2 rounded-lg transition
+          ${state.busy ? 'bg-slate-300 text-white cursor-not-allowed' : 'bg-brand hover:bg-brand-dark text-white'}">
+          ${state.busy ? 'Analyzing…' : 'Analyze with AI'}
+        </button>
+      </div>
+
+      ${Object.keys(counts).length
+        ? `<div class="flex flex-wrap gap-2 mt-4">
+             ${Object.entries(counts).map(([k, v]) =>
+               `<span class="text-[11px] font-semibold px-2 py-1 rounded-full ${TYPE_COLORS[k] || TYPE_COLORS.Other}">${esc(k)} · ${v}</span>`).join('')}
+           </div>`
+        : ''}
+
+      <div class="mt-4 space-y-2 max-h-[520px] overflow-y-auto pr-1">
+        ${a
+          ? (a.documents && a.documents.length
+              ? a.documents.map(docCard).join('')
+              : '<p class="text-sm text-slate-400">AI returned no document classifications.</p>')
+          : '<p class="text-sm text-slate-400 py-2">No analysis yet. Upload files, then click “Analyze with AI”.</p>'}
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ================= TAB 2: KEY DATES & CLAUSES ================= */
+function panelDates(p) {
+  const a = p.analysis;
+  if (!a) return noAnalysis();
+
+  const dates = a.key_dates || [];
+  const clauses = a.key_clauses || [];
+
+  return `<div class="grid lg:grid-cols-2 gap-5">
+    <div class="bg-white rounded-xl border border-slate-200 p-5">
+      <h2 class="font-semibold text-slate-800 mb-3">Key Dates</h2>
+      ${dates.length ? `
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead><tr class="text-left text-[11px] uppercase tracking-wide text-slate-500 border-b border-slate-200">
+              <th class="py-2 pr-3">Date</th><th class="py-2 pr-3">Event</th><th class="py-2">Source</th>
+            </tr></thead>
+            <tbody>
+              ${dates.map(d => `<tr class="border-b border-slate-100 last:border-0 align-top">
+                <td class="py-2.5 pr-3 font-semibold text-brand whitespace-nowrap">${fmtDate(d.date)}</td>
+                <td class="py-2.5 pr-3 text-slate-700">${esc(d.event || '')}</td>
+                <td class="py-2.5 text-xs text-slate-500">${esc(d.source || '')}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>` : emptyState('📅', 'No key dates found', 'The AI did not detect any contractual dates.')}
+    </div>
+
+    <div class="bg-white rounded-xl border border-slate-200 p-5">
+      <h2 class="font-semibold text-slate-800 mb-3">Key Clauses <span class="text-xs font-normal text-slate-500">(SCC alterations &amp; impact)</span></h2>
+      ${clauses.length ? `<div class="max-h-[600px] overflow-y-auto pr-1 space-y-2">
+        ${clauses.map(c => `
+          <div class="border border-slate-200 rounded-lg p-3">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-xs font-bold text-brand">${esc(c.clause || 'Clause')}</span>
+              ${c.source ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">${esc(c.source)}</span>` : ''}
             </div>
-            <ul id="fileList" class="space-y-2 text-sm max-h-48 overflow-y-auto mb-4">
-              <li class="text-slate-400 text-xs italic">No files uploaded yet.</li>
-            </ul>
+            <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">${esc(c.text || '')}</p>
+            ${c.impact ? `<p class="text-xs mt-1.5 text-amber-800 bg-amber-50 rounded px-2 py-1.5 leading-relaxed"><span class="font-semibold">Impact:</span> ${esc(c.impact)}</p>` : ''}
+          </div>`).join('')}
+      </div>` : emptyState('📝', 'No key clauses found', 'The AI did not detect any SCC alterations.')}
+    </div>
+  </div>`;
+}
+
+/* ================= TAB 3: VO & SOP TIMER ================= */
+function sopStatus(vo, period) {
+  const issued = parseDate(vo.date_issued);
+  const submitted = parseDate(vo.date_submitted);
+
+  if (!issued) {
+    const ai = (vo.sop_check || '').toLowerCase();
+    if (ai.includes('overdue'))   return { label: 'Overdue',   cls: 'rose',    detail: 'Per AI (issue date not found)' };
+    if (ai.includes('compliant')) return { label: 'Compliant', cls: 'emerald', detail: 'Per AI (issue date not found)' };
+    return { label: 'Unknown', cls: 'slate', detail: 'Date issued missing' };
+  }
+
+  const deadline = new Date(issued.getTime() + period * 86400000);
+  const deadlineStr = fmtDate(deadline);
+
+  if (!submitted) {
+    const overdue = utcToday() > deadline.getTime();
+    return overdue
+      ? { label: 'Overdue', cls: 'rose', detail: `Deadline ${deadlineStr} already passed` }
+      : { label: 'Pending', cls: 'amber', detail: `Response due ${deadlineStr}` };
+  }
+
+  const days = Math.round((submitted.getTime() - issued.getTime()) / 86400000);
+  const ok = submitted.getTime() <= deadline.getTime();
+  return {
+    label: ok ? 'Compliant' : 'Overdue',
+    cls: ok ? 'emerald' : 'rose',
+    detail: `${days} day${days === 1 ? '' : 's'} after issue (limit ${period}d · deadline ${deadlineStr})`
+  };
+}
+
+function timerTableHtml(vos, period) {
+  if (!vos.length) return emptyState('⏱️', 'No VO records', 'Run the AI analysis in Tab 1 to populate VO dates.');
+  return `<div class="overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead><tr class="text-left text-[11px] uppercase tracking-wide text-slate-500 border-b border-slate-200">
+        <th class="py-2 pr-3">VO No.</th>
+        <th class="py-2 pr-3">Date Issued</th>
+        <th class="py-2 pr-3">Date Submitted</th>
+        <th class="py-2 pr-3">Computation</th>
+        <th class="py-2">SOP Status</th>
+      </tr></thead>
+      <tbody>
+        ${vos.map(vo => {
+          const st = sopStatus(vo, period);
+          return `<tr class="border-b border-slate-100 last:border-0 align-top">
+            <td class="py-3 pr-3 font-semibold text-slate-800 whitespace-nowrap">${esc(vo.vo_number || '—')}</td>
+            <td class="py-3 pr-3 text-slate-600 whitespace-nowrap">${fmtDate(vo.date_issued)}</td>
+            <td class="py-3 pr-3 text-slate-600 whitespace-nowrap">${fmtDate(vo.date_submitted)}</td>
+            <td class="py-3 pr-3 text-xs text-slate-600">${esc(st.detail)}</td>
+            <td class="py-3">${badge(st.label, st.cls)}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+function panelTimer(p) {
+  const a = p.analysis;
+  if (!a) return noAnalysis();
+  const vos = a.vo_details || [];
+
+  return `<div class="bg-white rounded-xl border border-slate-200 p-5">
+    <div class="flex flex-wrap items-end gap-4 mb-4">
+      <div>
+        <h2 class="font-semibold text-slate-800">VO &amp; SOP Timer</h2>
+        <p class="text-xs text-slate-500 mt-1">Compares VO issue / submission dates against the Cap. 652 response period.</p>
+      </div>
+      <div class="ml-auto flex items-end gap-2">
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-600 mb-1">Response period (days)</label>
+          <input id="sopPeriod" type="number" min="1" value="${state.sopPeriod || 30}"
+            class="w-28 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+        </div>
+      </div>
+    </div>
+    <div id="timerTable">${timerTableHtml(vos, state.sopPeriod || 30)}</div>
+    <p class="text-[11px] text-slate-400 mt-4 leading-relaxed">
+      Note: the statutory 30-day period under the Security of Payment Ordinance (Cap. 652) may be extended by the contract.
+      Adjust the period above to match your SCC.
+    </p>
+  </div>`;
+}
+
+function updateTimerTable() {
+  const p = currentProject();
+  if (!p) return;
+  const input = $('#sopPeriod');
+  const period = parseInt(input.value, 10);
+  const safe = (!period || period <= 0) ? 30 : period;
+  state.sopPeriod = safe;
+  const host = $('#timerTable');
+  if (host) host.innerHTML = timerTableHtml((p.analysis && p.analysis.vo_details) || [], safe);
+}
+
+/* ================= TAB 4: VO ORGANIZER ================= */
+function panelOrganizer(p) {
+  const a = p.analysis;
+  if (!a) return noAnalysis();
+  const vos = a.vo_details || [];
+  if (!vos.length) {
+    return `<div class="bg-white rounded-xl border border-slate-200">${emptyState('📑', 'No VOs found', 'The AI did not detect any Variation Orders in the uploaded documents.')}</div>`;
+  }
+
+  return `<div class="space-y-3">
+    ${vos.map((vo, i) => {
+      const st = sopStatus(vo, state.sopPeriod || 30);
+      return `<details class="bg-white rounded-xl border border-slate-200 overflow-hidden">
+        <summary class="flex items-center gap-3 p-4 cursor-pointer select-none hover:bg-slate-50 transition">
+          <span class="chev text-slate-400 transition-transform text-xs">▶</span>
+          <span class="font-semibold text-slate-800">${esc(vo.vo_number || ('VO ' + (i + 1)))}</span>
+          <span class="text-xs text-slate-500 hidden sm:inline truncate max-w-[16rem]">${esc(vo.status || '')}</span>
+          <span class="ml-auto text-sm font-semibold text-brand whitespace-nowrap">${esc(vo.amount || '—')}</span>
+          ${badge(st.label, st.cls)}
+        </summary>
+        <div class="border-t border-slate-200 p-4 grid sm:grid-cols-3 gap-4 text-sm bg-slate-50/60">
+          <div>
+            <div class="text-[11px] uppercase tracking-wide text-slate-500">Amount</div>
+            <div class="font-medium text-slate-800">${esc(vo.amount || '—')}</div>
           </div>
-          <div class="bg-[#004AAD] p-4 rounded-lg text-white">
-            <b class="text-xs uppercase text-[#CBE6F7]">AI Analysis Engine</b>
-            <p class="text-xs text-slate-200 mt-1 mb-3">Sends text to AI to identify contract sections, dates, VOs, and GCC/SCC mappings.</p>
-            <button id="btnAnalyze" class="btn bg-white text-[#004AAD] w-full" onclick="runAIAnalysis()" disabled>Run AI Analysis</button>
-            <div id="progressLog" class="text-xs mt-2 text-[#CBE6F7] min-h-[20px]"></div>
+          <div>
+            <div class="text-[11px] uppercase tracking-wide text-slate-500">Date Issued</div>
+            <div class="font-medium text-slate-800">${fmtDate(vo.date_issued)}</div>
+          </div>
+          <div>
+            <div class="text-[11px] uppercase tracking-wide text-slate-500">Date Submitted</div>
+            <div class="font-medium text-slate-800">${fmtDate(vo.date_submitted)}</div>
+          </div>
+          <div class="sm:col-span-2">
+            <div class="text-[11px] uppercase tracking-wide text-slate-500">Status</div>
+            <div class="font-medium text-slate-800">${esc(vo.status || '—')}</div>
+          </div>
+          <div>
+            <div class="text-[11px] uppercase tracking-wide text-slate-500">SOP Check</div>
+            <div>${badge(st.label, st.cls)}</div>
+          </div>
+          <div class="sm:col-span-3 text-xs text-slate-600 border-t border-slate-200 pt-3">${esc(st.detail)}</div>
+        </div>
+      </details>`;
+    }).join('')}
+  </div>`;
+}
+
+/* ================= TAB 5: GCC/SCC CHECK & CALCULATOR ================= */
+function panelCheck(p) {
+  const a = p.analysis;
+  if (!a) return noAnalysis();
+  const map = a.scc_gcc_mapping || [];
+
+  return `<div class="grid lg:grid-cols-2 gap-5">
+    <div class="bg-white rounded-xl border border-slate-200 p-5">
+      <h2 class="font-semibold text-slate-800">SCC vs GCC Modifications</h2>
+      <p class="text-xs text-slate-500 mt-1 mb-4">Every place where the Special Conditions amend, replace or delete a General Condition.</p>
+      ${map.length ? `<div class="space-y-2 max-h-[600px] overflow-y-auto pr-1">
+        ${map.map(m => `
+          <div class="border border-slate-200 rounded-lg p-3 flex gap-3 items-start">
+            <div class="shrink-0 text-center min-w-[3rem]">
+              <div class="text-[10px] uppercase text-slate-400">SCC</div>
+              <div class="text-xs font-bold text-brand">${esc(m.scc_ref || '—')}</div>
+            </div>
+            <div class="shrink-0 text-center min-w-[3rem] border-l border-slate-200 pl-3">
+              <div class="text-[10px] uppercase text-slate-400">GCC</div>
+              <div class="text-xs font-bold text-slate-600">${esc(m.gcc_ref || '—')}</div>
+            </div>
+            <p class="text-xs text-slate-700 flex-1 leading-relaxed border-l border-slate-200 pl-3">${esc(m.change || '')}</p>
+          </div>`).join('')}
+      </div>` : emptyState('🔍', 'No SCC/GCC modifications detected', 'The AI found no Special Conditions overriding the General Conditions.')}
+    </div>
+
+    <div class="bg-white rounded-xl border border-slate-200 p-5 h-fit">
+      <h2 class="font-semibold text-slate-800">Cap. 652 Timeline Calculator</h2>
+      <p class="text-xs text-slate-500 mt-1 mb-4">Interactive Security of Payment deadline checker.</p>
+
+      <label class="block text-xs font-semibold text-slate-600 mb-1">Payment claim date</label>
+      <input id="calcClaimDate" type="date"
+        class="w-full mb-3 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+
+      <label class="block text-xs font-semibold text-slate-600 mb-1">Response period (days)</label>
+      <input id="calcPeriod" type="number" min="1" value="30"
+        class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand">
+
+      <div id="calcOut"></div>
+    </div>
+  </div>`;
+}
+
+function updateCalc() {
+  const cd = $('#calcClaimDate');
+  const cp = $('#calcPeriod');
+  const out = $('#calcOut');
+  if (!cd || !cp || !out) return;
+
+  const claim = parseDate(cd.value);
+  const days = parseInt(cp.value, 10);
+
+  if (!claim || !days || days <= 0) {
+    out.innerHTML = '<p class="text-sm text-slate-400 mt-4">Enter a valid claim date and response period.</p>';
+    return;
+  }
+
+  const deadline = new Date(claim.getTime() + days * 86400000);
+  const start = claim.getTime();
+  const end = deadline.getTime();
+  const today = utcToday();
+  const total = end - start;
+
+  const pct = total > 0 ? Math.max(0, Math.min(100, ((today - start) / total) * 100)) : 100;
+  const remaining = Math.round((end - today) / 86400000);
+  const overdue = remaining < 0;
+  const near = !overdue && remaining <= 5;
+  const barColor = overdue ? 'bg-rose-500' : near ? 'bg-amber-500' : 'bg-emerald-500';
+
+  out.innerHTML = `
+    <div class="mt-5 rounded-xl border border-slate-200 p-4 bg-slate-50/70">
+      <div class="flex flex-wrap gap-x-8 gap-y-3 text-sm">
+        <div>
+          <div class="text-[11px] uppercase tracking-wide text-slate-500">Payment claim date</div>
+          <div class="font-semibold text-slate-800">${fmtDate(cd.value)}</div>
+        </div>
+        <div>
+          <div class="text-[11px] uppercase tracking-wide text-slate-500">Statutory deadline (+${days}d)</div>
+          <div class="font-semibold text-brand">${fmtDate(deadline.toISOString().slice(0, 10))}</div>
+        </div>
+        <div>
+          <div class="text-[11px] uppercase tracking-wide text-slate-500">${overdue ? 'Overdue by' : 'Days remaining'}</div>
+          <div class="font-semibold ${overdue ? 'text-rose-600' : near ? 'text-amber-600' : 'text-emerald-600'}">
+            ${Math.abs(remaining)} day${Math.abs(remaining) === 1 ? '' : 's'}
           </div>
         </div>
       </div>
-    </section>
 
-    <!-- TAB 2: Key Dates & Clauses -->
-    <section id="tab2" class="section ${state.activeTab === 'tab2' ? 'active' : ''}">
-      <div id="tab2Content" class="text-center text-slate-500 py-10">Run AI analysis in Tab 1 to view data.</div>
-    </section>
-
-    <!-- TAB 3: VO & SOP Timer -->
-    <section id="tab3" class="section ${state.activeTab === 'tab3' ? 'active' : ''}">
-      <div id="tab3Content" class="text-center text-slate-500 py-10">Run AI analysis in Tab 1 to view data.</div>
-    </section>
-
-    <!-- TAB 4: VO Organizer -->
-    <section id="tab4" class="section ${state.activeTab === 'tab4' ? 'active' : ''}">
-      <div id="tab4Content" class="text-center text-slate-500 py-10">Run AI analysis in Tab 1 to view data.</div>
-    </section>
-
-    <!-- TAB 5: GCC/SCC & Calc -->
-    <section id="tab5" class="section ${state.activeTab === 'tab5' ? 'active' : ''}">
-      <div class="grid lg:grid-cols-2 gap-6">
-        <div id="tab5Content" class="text-center text-slate-500 py-10">Run AI analysis to view GCC/SCC mappings.</div>
-        
-        <!-- Timeline Calculator -->
-        <div class="card space-y-3">
-          <h3 class="font-bold text-sm border-b pb-2">Cap. 652 Timeline Calculator</h3>
-          <label class="block text-xs font-bold text-slate-700">Claim Notice Date
-            <input id="calcDate" type="date" class="input mt-1">
-          </label>
-          <label class="block text-xs font-bold text-slate-700">Response Period (Days)
-            <select id="calcDays" class="input mt-1">
-              <option value="30">30 Days (Cap. 652 Default)</option>
-              <option value="21">21 Days</option>
-              <option value="14">14 Days</option>
-            </select>
-          </label>
-          <button class="btn w-full" onclick="runCalculator()">Generate Timeline</button>
-          <div id="timelineOutput" class="text-xs text-slate-500 mt-4"></div>
-        </div>
+      <div class="mt-4 h-2.5 w-full bg-slate-200 rounded-full overflow-hidden">
+        <div class="h-full ${barColor} rounded-full transition-all duration-500" style="width:${pct.toFixed(1)}%"></div>
       </div>
-    </section>
-  `);
+      <div class="flex justify-between text-[11px] text-slate-500 mt-1"><span>Claim</span><span>Deadline</span></div>
 
-  // Initialize file list UI
-  updateFileListUI();
+      <p class="text-[11px] text-slate-500 mt-3 leading-relaxed">
+        Indicative calculation only. Under the Security of Payment Ordinance (Cap. 652) a payment response is generally
+        due within 30 days of a payment claim, or such longer period as the contract provides. Always verify against your
+        SCC and the Ordinance.
+      </p>
+    </div>`;
 }
 
-function refreshProject() {
-  state.files = [];
-  state.aiData = null;
-  updateFileListUI();
-  renderProject();
+/* ================= PANEL EVENT BINDING ================= */
+function bindPanel() {
+  // Dropzone
+  const dz = document.getElementById('dropzone');
+  const fi = document.getElementById('fileInput');
+  if (dz && fi) {
+    dz.addEventListener('click', () => fi.click());
+    dz.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fi.click(); }
+    });
+    ['dragenter', 'dragover'].forEach(ev => dz.addEventListener(ev, e => {
+      e.preventDefault(); e.stopPropagation();
+      dz.classList.add('border-brand', 'bg-brand-light');
+    }));
+    ['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => {
+      e.preventDefault(); e.stopPropagation();
+      dz.classList.remove('border-brand', 'bg-brand-light');
+    }));
+    dz.addEventListener('drop', e => {
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+    });
+    fi.addEventListener('change', e => {
+      if (e.target.files && e.target.files.length) handleFiles(e.target.files);
+    });
+  }
+
+  // SOP period
+  const sp = document.getElementById('sopPeriod');
+  if (sp) {
+    sp.value = state.sopPeriod || 30;
+    sp.addEventListener('input', updateTimerTable);
+  }
+
+  // Calculator
+  const cd = document.getElementById('calcClaimDate');
+  if (cd) {
+    if (!cd.value) cd.value = new Date().toISOString().slice(0, 10);
+    cd.addEventListener('input', updateCalc);
+    const cp = document.getElementById('calcPeriod');
+    if (cp) cp.addEventListener('input', updateCalc);
+    updateCalc();
+  }
 }
 
-// ==========================================
-// 3. File Handling & AI Integration
-// ==========================================
+/* ================= FILE HANDLING ================= */
+function setFileStatus(id, text, cls) {
+  const el = document.querySelector(`[data-file-status="${id}"]`);
+  if (!el) return;
+  el.textContent = text;
+  if (cls) el.className = cls;
+}
+
+async function extractPdfText(file, onProgress) {
+  if (typeof pdfjsLib === 'undefined') throw new Error('pdf.js failed to load');
+  const buf = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+  let out = '';
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    out += content.items.map(it => it.str).join(' ') + '\n\n';
+    if (onProgress) onProgress(i, pdf.numPages);
+  }
+  return out;
+}
+
 async function handleFiles(fileList) {
-  for (const file of fileList) {
-    if (file.size > 50 * 1024 * 1024) { alert(file.name + ' is too large (max 50MB)'); continue; }
-    
-    let text = '', pages = 0;
+  const p = currentProject();
+  if (!p) return;
+
+  const jobs = Array.from(fileList).map(file => {
+    const rec = {
+      id: uid(), name: file.name, size: file.size,
+      text: '', status: 'reading', progress: 'Reading…'
+    };
+    p.files.push(rec);
+    return { file, rec };
+  });
+
+  render();
+
+  for (const { file, rec } of jobs) {
     try {
-      if (file.name.endsWith('.txt')) {
+      let text = '';
+      if (/\.pdf$/i.test(file.name) || file.type === 'application/pdf') {
+        text = await extractPdfText(file, (cur, total) => {
+          setFileStatus(rec.id, `Page ${cur}/${total}`, 'text-amber-600');
+        });
+      } else {
         text = await file.text();
-      } else if (file.name.endsWith('.pdf')) {
-        const arrayBuffer = await file.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        pages = pdf.numPages;
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
-          const content = await page.getTextContent();
-          text += content.items.map(x => x.str).join(' ') + '\n';
-        }
       }
-      state.files.push({ name: file.name, text, pages });
-    } catch (e) {
-      alert('Error reading ' + file.name + ': ' + e.message);
+      rec.text = (text || '').trim();
+      rec.status = 'ready';
+      rec.progress = rec.text.length
+        ? `${rec.text.length.toLocaleString()} chars extracted`
+        : 'No extractable text (scanned PDF?)';
+      if (!rec.text.length) { rec.status = 'error'; rec.progress = 'No extractable text'; }
+    } catch (err) {
+      console.error(err);
+      rec.status = 'error';
+      rec.progress = err.message || 'Failed to read file';
     }
+    touch(p);
+    saveProjects();
+    render();
   }
-  updateFileListUI();
+
+  toast('Documents extracted locally. Run the AI analysis when ready.', 'ok');
 }
 
-function updateFileListUI() {
-  $('fileCount').innerText = state.files.length + ' files';
-  if (state.files.length === 0) {
-    $('fileList').innerHTML = '<li class="text-slate-400 text-xs italic">No files uploaded yet.</li>';
-    $('btnAnalyze').disabled = true;
-  } else {
-    $('fileList').innerHTML = state.files.map(f => `
-      <li class="flex justify-between items-center bg-slate-50 p-2 rounded border">
-        <span class="truncate w-3/4" title="${f.name}">${f.name}</span>
-        <span class="text-xs text-slate-500">${f.pages ? f.pages + 'p' : 'txt'}</span>
-      </li>
-    `).join('');
-    $('btnAnalyze').disabled = false;
+function removeFile(id) {
+  const p = currentProject();
+  if (!p) return;
+  p.files = (p.files || []).filter(f => f.id !== id);
+  touch(p);
+  saveProjects();
+  render();
+}
+
+/* ================= AI INTEGRATION ================= */
+const SYSTEM_PROMPT = `You are "QS SMART AI", a senior Quantity Surveyor and contracts analyst specialising in Hong Kong construction contracts (HKIA / HKIS GCC and SCC) and the Security of Payment Ordinance (Cap. 652).
+
+Analyse the supplied construction documents and return ONE raw JSON object.
+
+ABSOLUTE OUTPUT RULES:
+- Output RAW JSON ONLY. No markdown, no \`\`\`json fences, no commentary, no preamble, no explanation after.
+- The response must start with { and end with }.
+- Use valid JSON: double quotes only, no trailing commas, no comments.
+- If a value is unknown, use an empty string "" or an empty array [].
+- Dates MUST be formatted YYYY-MM-DD when known.
+
+REQUIRED SCHEMA:
+{
+  "documents": [{"name": "string", "type": "GCC | SCC | VO | AI | Other", "summary": "string"}],
+  "key_dates": [{"date": "YYYY-MM-DD", "event": "string", "source": "string"}],
+  "key_clauses": [{"clause": "string", "source": "string", "text": "string", "impact": "string"}],
+  "vo_details": [{"vo_number": "string", "amount": "string", "date_issued": "YYYY-MM-DD", "date_submitted": "YYYY-MM-DD", "status": "string", "sop_check": "Compliant | Overdue"}],
+  "scc_gcc_mapping": [{"scc_ref": "string", "gcc_ref": "string", "change": "string"}]
+}
+
+CLASSIFICATION RULES:
+- "GCC" = General Conditions of Contract.
+- "SCC" = Special Conditions of Contract, including any Part B / amendments / appendices that modify the GCC.
+- "VO" = Variation Order, variation instruction, or VO supporting documents.
+- "AI" = Architect's Instructions or other AI-labelled supporting documents.
+- "Other" = anything else.
+
+ANALYSIS RULES:
+- key_dates: extract every contractual milestone, deadline, commencement / completion date, VO issue date and notice-period date found in the text.
+- key_clauses: focus on clauses ALTERED, ADDED or DELETED by the SCC relative to the GCC, plus any clause with cost or time impact.
+- vo_details: one entry per VO found. "amount" as a string with currency (e.g. "HKD 1,250,000") or "" if not stated. "sop_check" = "Compliant" if the submission appears to fall within the Cap. 652 / SCC response period, otherwise "Overdue".
+- scc_gcc_mapping: list every place where the SCC modifies the GCC. scc_ref = the SCC clause reference; gcc_ref = the GCC clause it replaces or amends.
+
+Base every answer strictly on the supplied text. Never invent clause numbers, dates or amounts.`;
+
+function normalizeEndpoint(url) {
+  let u = (url || '').trim();
+  if (!u) throw new Error('API endpoint is empty');
+  u = u.replace(/\/+$/, '');
+  if (/\/chat\/completions$/i.test(u)) return u;
+  return u + '/chat/completions';
+}
+
+async function callAPIRaw(endpoint, apiKey, model, messages, maxTokens) {
+  const url = normalizeEndpoint(endpoint);
+  const headers = { 'Content-Type': 'application/json' };
+  if (apiKey) headers['Authorization'] = 'Bearer ' + apiKey;
+
+  const body = { model: model || 'deepseek-chat', messages, temperature: 0.1, stream: false };
+  if (maxTokens) body.max_tokens = maxTokens;
+
+  let res;
+  try {
+    res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
+  } catch (e) {
+    throw new Error('Network / CORS error: ' + e.message);
+  }
+  if (!res.ok) {
+    let t = '';
+    try { t = await res.text(); } catch (e) {}
+    throw new Error(`HTTP ${res.status} ${res.statusText}${t ? ' — ' + t.slice(0, 200) : ''}`);
+  }
+  const data = await res.json();
+  const content = data && data.choices && data.choices[0] && data.choices[0].message
+    ? data.choices[0].message.content : null;
+  if (typeof content !== 'string') throw new Error('Unexpected response shape (no choices[0].message.content)');
+  return content;
+}
+
+function callAPI(messages) {
+  const s = state.settings;
+  if (!s.endpoint) throw new Error('API endpoint not configured. Click the gear icon to set it.');
+  return callAPIRaw(s.endpoint, s.apiKey, s.model, messages, 0);
+}
+
+function parseAIJson(raw) {
+  let s = String(raw || '').trim();
+  s = s.replace(/```json/gi, '').replace(/```/g, '').trim();
+  const a = s.indexOf('{');
+  const b = s.lastIndexOf('}');
+  if (a === -1 || b === -1 || b <= a) throw new Error('No JSON object found in the AI response');
+  s = s.slice(a, b + 1);
+  try {
+    return JSON.parse(s);
+  } catch (e) {
+    // last-resort cleanup of common issues
+    const cleaned = s.replace(/,\s*([}\]])/g, '$1');
+    return JSON.parse(cleaned);
   }
 }
 
-async function runAIAnalysis() {
-  if (state.files.length === 0 || state.isAnalyzing) return;
-  const cfg = loadCfg();
-  if (!cfg.endpoint || !cfg.apiKey || !cfg.model) return alert('Please configure API Settings first.');
+function normalizeAnalysis(o) {
+  const arr = v => Array.isArray(v) ? v : [];
+  return {
+    documents: arr(o.documents).map(d => ({
+      name: d.name || '', type: (d.type || 'Other'), summary: d.summary || ''
+    })),
+    key_dates: arr(o.key_dates).map(d => ({
+      date: d.date || '', event: d.event || '', source: d.source || ''
+    })),
+    key_clauses: arr(o.key_clauses).map(c => ({
+      clause: c.clause || '', source: c.source || '', text: c.text || '', impact: c.impact || ''
+    })),
+    vo_details: arr(o.vo_details).map(v => ({
+      vo_number: v.vo_number || '', amount: v.amount || '',
+      date_issued: v.date_issued || '', date_submitted: v.date_submitted || '',
+      status: v.status || '', sop_check: v.sop_check || ''
+    })),
+    scc_gcc_mapping: arr(o.scc_gcc_mapping).map(m => ({
+      scc_ref: m.scc_ref || '', gcc_ref: m.gcc_ref || '', change: m.change || ''
+    }))
+  };
+}
 
-  state.isAnalyzing = true;
-  $('btnAnalyze').disabled = true;
-  $('btnAnalyze').innerText = 'Processing...';
-  $('progressLog').innerText = 'Combining document texts...';
+async function analyzeProject() {
+  const p = currentProject();
+  if (!p) return;
+
+  const ready = (p.files || []).filter(f => f.text && f.text.trim());
+  if (!ready.length) {
+    toast('Upload at least one document with extractable text first.', 'warn');
+    return;
+  }
+
+  // Combine text, truncated to ~40,000 characters
+  const LIMIT = 40000;
+  let combined = '';
+  for (const f of ready) {
+    const block = `\n\n===== FILE: ${f.name} =====\n${f.text}`;
+    if (combined.length + block.length > LIMIT) {
+      combined += block.slice(0, Math.max(0, LIMIT - combined.length));
+      break;
+    }
+    combined += block;
+  }
+
+  state.busy = true;
+  renderWorkspace();
 
   try {
-    // Combine text, limiting to ~40k characters to avoid API limits
-    let combinedText = state.files.map(f => `--- File: ${f.name} ---\n${f.text}`).join('\n\n');
-    if (combinedText.length > 40000) {
-      combinedText = combinedText.substring(0, 40000) + '\n\n[TRUNCATED DUE TO LENGTH]';
-      $('progressLog').innerText = 'Warning: Text truncated to 40k chars.';
-    }
+    const raw = await callAPI([
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'user', content: `Here are the project documents:\n${combined}\n\nAnalyse them and return the JSON object only.` }
+    ]);
 
-    $('progressLog').innerText = 'AI is extracting structured data...';
-
-    // VERY STRICT PROMPT
-    const systemPrompt = `You are an expert Quantity Surveyor and Legal Auditor in Hong Kong.
-Analyze the provided text which contains GCC, SCC, and VO documents.
-Extract information and YOU MUST RESPOND WITH A VALID RAW JSON OBJECT ONLY, no markdown blocks like \`\`\`json.
-Format exactly as follows:
-{
-  "documents": [{"name": "Filename", "type": "GCC | SCC | VO | AI | Other", "summary": "Brief description"}],
-  "key_dates": [{"date": "YYYY-MM-DD", "event": "Description", "source": "Filename"}],
-  "key_clauses": [{"clause": "Clause Number", "source": "GCC | SCC | VO", "text": "Exact quote or summary", "impact": "Why it matters"}],
-  "vo_details": [
-    {
-      "vo_number": "VO-01",
-      "amount": "HK$ 1,000,000",
-      "date_issued": "YYYY-MM-DD",
-      "date_submitted": "YYYY-MM-DD",
-      "status": "Pending | Approved | Time-barred",
-      "sop_check": "Compliant | Overdue"
-    }
-  ],
-  "scc_gcc_mapping": [
-    {"scc_ref": "SCC 13", "gcc_ref": "GCC 13", "change": "Description of what was altered/deleted/added"}
-  ]
-}
-If a section has no data, return an empty array [].`;
-
-    let url = cfg.endpoint.replace(/\/$/, '');
-    if (!url.endsWith('/chat/completions')) url = url.endsWith('/v1') ? url + '/chat/completions' : url + '/v1/chat/completions';
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + cfg.apiKey },
-      body: JSON.stringify({
-        model: cfg.model,
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: "Here is the document text:\n\n" + combinedText }
-        ],
-        temperature: 0.1 // Keep very low for JSON consistency
-      })
-    });
-
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error?.message || "API Error");
-
-    let rawContent = data.choices[0].message.content;
-    // Strip markdown if AI ignores instructions
-    rawContent = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
-    
-    state.aiData = JSON.parse(rawContent);
-    
-    // Render all tabs with new data
-    renderDashboard();
-    renderTab2();
-    renderTab3();
-    renderTab4();
-    renderTab5();
-    
-    $('progressLog').innerText = 'Analysis Complete! Check other tabs.';
-    switchTab('tab2'); // Automatically jump to results
-
-  } catch (error) {
-    console.error(error);
-    $('progressLog').innerText = 'Error: ' + error.message;
-    alert('Analysis failed: ' + error.message);
+    const json = parseAIJson(raw);
+    p.analysis = normalizeAnalysis(json);
+    p.analyzedAt = Date.now();
+    touch(p);
+    saveProjects();
+    toast('Analysis complete — all tabs updated.', 'ok');
+  } catch (e) {
+    console.error(e);
+    toast('AI analysis failed: ' + e.message, 'error');
   } finally {
-    state.isAnalyzing = false;
-    $('btnAnalyze').disabled = false;
-    $('btnAnalyze').innerText = 'Re-run AI Analysis';
+    state.busy = false;
+    renderWorkspace();
   }
 }
 
-// ==========================================
-// 4. Render Tabs Based on AI Data
-// ==========================================
-function renderDashboard() {
-  const d = state.aiData;
-  if (!d) return;
-
-  const docList = d.documents.map(doc => `
-    <div class="flex items-center justify-between p-3 border-b last:border-0">
-      <div>
-        <b class="text-slate-800 block text-sm">${doc.name}</b>
-        <span class="text-xs text-slate-500">${doc.summary}</span>
-      </div>
-      <span class="bg-[#004AAD] text-white px-2 py-1 rounded text-[10px] font-bold uppercase">${doc.type}</span>
-    </div>
-  `).join('');
-
-  $('tab1').innerHTML += `
-    <div class="card mt-6">
-      <h3 class="font-bold text-sm border-b pb-2 mb-3 text-slate-800">AI Document Classification</h3>
-      ${docList || '<span class="text-slate-400 text-xs">No documents classified.</span>'}
-    </div>
-  `;
+/* ================= SETTINGS ================= */
+function openSettings() {
+  $('#setEndpoint').value = state.settings.endpoint || '';
+  $('#setApiKey').value = state.settings.apiKey || '';
+  $('#setModel').value = state.settings.model || 'deepseek-chat';
+  const tr = $('#testResult');
+  tr.textContent = '';
+  tr.className = 'text-xs mb-3 min-h-[1rem]';
+  $('#modalSettings').classList.remove('hidden');
 }
-
-function renderTab2() {
-  const d = state.aiData;
-  if (!d) return;
-
-  const dateHtml = d.key_dates.map(dt => `
-    <li class="flex justify-between py-2 border-b last:border-0 text-sm">
-      <span class="font-mono text-[#004AAD] font-bold w-24 shrink-0">${dt.date}</span>
-      <span class="text-slate-700 flex-1">${dt.event}</span>
-      <span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded">${dt.source}</span>
-    </li>
-  `).join('');
-
-  const clauseHtml = d.key_clauses.map(c => `
-    <div class="p-3 border-l-4 border-[#004AAD] bg-slate-50 mb-2 text-sm">
-      <div class="flex justify-between mb-1">
-        <b class="text-[#004AAD]">${c.source} - ${c.clause}</b>
-      </div>
-      <p class="text-slate-800 font-medium mb-1">${c.text}</p>
-      <p class="text-slate-500 text-xs">Impact: ${c.impact}</p>
-    </div>
-  `).join('');
-
-  $('tab2Content').innerHTML = `
-    <div class="grid md:grid-cols-2 gap-6">
-      <div class="card">
-        <h3 class="font-bold text-sm border-b pb-2 mb-3 text-slate-800">Highlighted Key Dates</h3>
-        <ul>${dateHtml || '<li class="text-slate-400 text-xs">No dates found.</li>'}</ul>
-      </div>
-      <div class="card">
-        <h3 class="font-bold text-sm border-b pb-2 mb-3 text-slate-800">Key Clauses & Alterations</h3>
-        ${clauseHtml || '<span class="text-slate-400 text-xs">No clauses found.</span>'}
-      </div>
-    </div>
-  `;
-}
-
-function renderTab3() {
-  const d = state.aiData;
-  if (!d) return;
-  
-  // Auto-fill calc if dates exist
-  if (d.key_dates && d.key_dates.length > 0) {
-    const sorted = [...d.key_dates].sort((a,b) => new Date(a.date) - new Date(b.date));
-    $('calcDate').value = sorted[0].date;
-    runCalculator();
-  }
-
-  const voHtml = d.vo_details.map(vo => `
-    <div class="card mb-4 border-l-4 ${vo.sop_check === 'Overdue' ? 'border-red-500' : 'border-emerald-500'}">
-      <div class="flex justify-between items-start mb-2">
-        <div>
-          <h4 class="font-bold text-slate-800 text-lg">${vo.vo_number}</h4>
-          <span class="text-xs text-slate-500">Issued: ${vo.date_issued} | Submitted: ${vo.date_submitted}</span>
-        </div>
-        <span class="bg-slate-100 text-slate-700 font-bold px-3 py-1 rounded">${vo.amount}</span>
-      </div>
-      <div class="flex gap-2 text-xs mt-3">
-        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded font-bold">Status: ${vo.status}</span>
-        <span class="${vo.sop_check === 'Overdue' ? 'bg-red-100 text-red-800' : 'bg-emerald-100 text-emerald-800'} px-2 py-1 rounded font-bold">SOP Timer: ${vo.sop_check}</span>
-      </div>
-    </div>
-  `).join('');
-
-  $('tab3Content').innerHTML = `
-    <div class="mb-4">
-      <h2 class="text-xl font-bold text-slate-900">VO Verification & SOP Timer</h2>
-      <p class="text-sm text-slate-500">Checks VO submission against SCC time-bars and Cap. 652.</p>
-    </div>
-    <div class="grid md:grid-cols-2 gap-6">
-      <div>
-        ${voHtml || '<div class="card text-slate-400 text-sm">No VO details found.</div>'}
-      </div>
-      <div class="card">
-         <h3 class="font-bold text-sm border-b pb-2 mb-3 text-slate-800">Required Actions</h3>
-         <ul class="text-sm space-y-2 text-slate-700">
-           ${d.vo_details.some(v => v.sop_check === 'Overdue') 
-              ? '<li class="text-red-600 font-bold">⚠️ Warning: One or more VOs exceed the statutory response period.</li>' 
-              : '<li class="text-emerald-600 font-bold">✔ All extracted VOs appear within time limits.</li>'}
-           <li>Review SCC 28.2 for detailed claim particulars.</li>
-           <li>Ensure VO responses are served within 30 days of submission.</li>
-         </ul>
-      </div>
-    </div>
-  `;
-}
-
-function renderTab4() {
-  const d = state.aiData;
-  if (!d) return;
-
-  const accordion = d.vo_details.map(vo => `
-    <details>
-      <summary>
-        <div class="flex justify-between w-full pr-4">
-          <span>${vo.vo_number} - ${vo.amount}</span>
-          <span class="text-xs text-slate-500">${vo.date_issued}</span>
-        </div>
-      </summary>
-      <div class="detail-content">
-        <table class="w-full text-left border-collapse">
-          <tr class="border-b"><th class="py-1 text-slate-500 font-normal w-1/3">Amount</th><td class="font-bold">${vo.amount}</td></tr>
-          <tr class="border-b"><th class="py-1 text-slate-500 font-normal">Date Issued</th><td>${vo.date_issued}</td></tr>
-          <tr class="border-b"><th class="py-1 text-slate-500 font-normal">Date Submitted</th><td>${vo.date_submitted}</td></tr>
-          <tr class="border-b"><th class="py-1 text-slate-500 font-normal">Status</th><td>${vo.status}</td></tr>
-          <tr><th class="py-1 text-slate-500 font-normal">SOP Check</th><td class="${vo.sop_check === 'Overdue' ? 'text-red-600 font-bold' : 'text-emerald-600 font-bold'}">${vo.sop_check}</td></tr>
-        </table>
-      </div>
-    </details>
-  `).join('');
-
-  $('tab4Content').innerHTML = `
-    <div class="mb-4">
-      <h2 class="text-xl font-bold text-slate-900">VO Organizer</h2>
-      <p class="text-sm text-slate-500">Expand VOs to compare details side-by-side.</p>
-    </div>
-    <div class="space-y-2">
-      ${accordion || '<div class="text-slate-400 text-sm">No VOs found.</div>'}
-    </div>
-  `;
-}
-
-function renderTab5() {
-  const d = state.aiData;
-  if (!d) return;
-
-  const mapHtml = d.scc_gcc_mapping.map(m => `
-    <div class="flex gap-4 p-3 border-b last:border-0 text-sm items-start">
-      <div class="w-1/3 shrink-0">
-        <span class="bg-blue-100 text-blue-800 font-bold px-2 py-1 rounded block text-center mb-1">${m.scc_ref}</span>
-      </div>
-      <div class="text-slate-400 pt-1">➔</div>
-      <div class="w-1/3 shrink-0">
-        <span class="bg-slate-100 text-slate-800 font-bold px-2 py-1 rounded block text-center mb-1">${m.gcc_ref}</span>
-      </div>
-      <div class="flex-1 text-xs text-slate-600 mt-1">
-        <b>Change:</b> ${m.change}
-      </div>
-    </div>
-  `).join('');
-
-  $('tab5Content').innerHTML = `
-    <div class="card mb-6">
-      <h3 class="font-bold text-sm border-b pb-2 mb-3 text-slate-800">SCC to GCC Mapping (Highlighting Alterations)</h3>
-      ${mapHtml || '<span class="text-slate-400 text-xs">No mappings identified.</span>'}
-    </div>
-  `;
-}
-
-// ==========================================
-// 5. Utilities & Modals
-// ==========================================
-function openNewProjectModal() {
-  $('modalContainer').innerHTML = `
-    <div class="overlay" onclick="if(event.target===this)$('modalContainer').innerHTML=''">
-      <div class="modal">
-        <h3 class="font-bold text-lg mb-4">Create New Project</h3>
-        <div class="space-y-3 text-sm">
-          <div><label class="font-bold text-xs">Project Name</label><input id="np-name" class="input mt-1" placeholder="e.g. Hospital Extension"></div>
-          <div><label class="font-bold text-xs">Contract Type</label><input id="np-contract" class="input mt-1" placeholder="e.g. Main Building Works"></div>
-          <div><label class="font-bold text-xs">Reference</label><input id="np-ref" class="input mt-1" placeholder="e.g. W/12345"></div>
-        </div>
-        <div class="flex justify-end gap-2 mt-6">
-          <button class="btn secondary" onclick="$('modalContainer').innerHTML=''">Cancel</button>
-          <button class="btn" onclick="createProject()">Create</button>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-function createProject() {
-  const name = $('np-name').value.trim();
-  if (!name) return alert('Name is required');
-  const p = {
-    id: 'p' + Date.now(),
-    name: name,
-    contract: $('np-contract').value.trim(),
-    ref: $('np-ref').value.trim()
-  };
-  state.projects.push(p);
-  saveProjects();
-  $('modalContainer').innerHTML = '';
-  renderHome();
-}
-
-function openSettingsModal() {
-  const c = loadCfg();
-  $('modalContainer').innerHTML = `
-    <div class="overlay" onclick="if(event.target===this)$('modalContainer').innerHTML=''">
-      <div class="modal">
-        <h3 class="font-bold text-lg mb-1">API Settings</h3>
-        <p class="text-xs text-slate-500 mb-4">Key is saved locally in this browser.</p>
-        <div class="space-y-3 text-sm">
-          <div><label class="font-bold text-xs">Endpoint</label><input id="cfg-endpoint" class="input mt-1" value="${c.endpoint||''}" placeholder="https://.../v1"></div>
-          <div><label class="font-bold text-xs">API Key</label><input id="cfg-key" type="password" class="input mt-1" value="${c.apiKey||''}"></div>
-          <div><label class="font-bold text-xs">Model Name</label><input id="cfg-model" class="input mt-1" value="${c.model||''}" placeholder="deepseek-chat"></div>
-        </div>
-        <div class="flex justify-end gap-2 mt-6">
-          <button class="btn secondary" onclick="$('modalContainer').innerHTML=''">Cancel</button>
-          <button class="btn" onclick="saveSettings()">Save Config</button>
-        </div>
-      </div>
-    </div>
-  `;
-}
+function closeSettings() { $('#modalSettings').classList.add('hidden'); }
 
 function saveSettings() {
-  const cfg = {
-    endpoint: $('cfg-endpoint').value.trim(),
-    apiKey: $('cfg-key').value.trim(),
-    model: $('cfg-model').value.trim()
+  state.settings = {
+    endpoint: ($('#setEndpoint').value || '').trim(),
+    apiKey: ($('#setApiKey').value || '').trim(),
+    model: ($('#setModel').value || '').trim() || 'deepseek-chat'
   };
-  localStorage.setItem('qs_cfg', JSON.stringify(cfg));
-  $('modalContainer').innerHTML = '';
-  alert('Settings Saved!');
+  try {
+    localStorage.setItem(LS_SETTINGS, JSON.stringify(state.settings));
+  } catch (e) {
+    toast('Could not save settings (storage full).', 'error');
+    return;
+  }
+  closeSettings();
+  toast('API settings saved.', 'ok');
 }
 
-function runCalculator() {
-  const dateVal = $('calcDate').value;
-  if (!dateVal) return;
-  const days = parseInt($('calcDays').value);
-  
-  const start = new Date(dateVal);
-  const deadline = new Date(start);
-  deadline.setDate(deadline.getDate() + days);
-  
-  const today = new Date();
-  const diffTime = deadline - today;
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+async function testConnection() {
+  const tr = $('#testResult');
+  const endpoint = ($('#setEndpoint').value || '').trim();
+  const apiKey = ($('#setApiKey').value || '').trim();
+  const model = ($('#setModel').value || '').trim() || 'deepseek-chat';
 
-  const isOverdue = diffDays < 0;
-  const colorClass = isOverdue ? 'text-red-600' : 'text-emerald-600';
+  if (!endpoint) {
+    tr.className = 'text-xs mb-3 text-rose-600';
+    tr.textContent = 'Enter an endpoint URL first.';
+    return;
+  }
 
-  $('timelineOutput').innerHTML = `
-    <div class="p-4 rounded-lg border ${isOverdue ? 'bg-red-50 border-red-200' : 'bg-emerald-50 border-emerald-200'} mb-4">
-      <div class="text-sm font-bold ${colorClass}">
-        ${isOverdue ? '❌ RESPONSE OVERDUE' : '✔ ' + diffDays + ' DAYS REMAINING'}
-      </div>
-      <p class="text-xs text-slate-600 mt-1">
-        Statutory Deadline: <b>${deadline.toISOString().split('T')[0]}</b>
-      </p>
-    </div>
-    <div class="relative border-l-2 border-[#004AAD] ml-3 pl-6 space-y-6">
-      <div class="relative">
-        <div class="absolute -left-[31px] top-0 bg-[#004AAD] text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold">1</div>
-        <b class="text-slate-800 text-sm block">Payment Claim Received</b>
-        <span class="text-[#004AAD] font-mono text-xs font-bold">${start.toISOString().split('T')[0]}</span>
-      </div>
-      <div class="relative">
-        <div class="absolute -left-[31px] top-0 ${isOverdue ? 'bg-red-500' : 'bg-amber-500'} text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold">2</div>
-        <b class="text-slate-800 text-sm block">Payment Response Deadline</b>
-        <span class="text-amber-600 font-mono text-xs font-bold">${deadline.toISOString().split('T')[0]}</span>
-      </div>
-    </div>
-  `;
+  tr.className = 'text-xs mb-3 text-slate-500';
+  tr.textContent = 'Testing…';
+
+  try {
+    const text = await callAPIRaw(endpoint, apiKey, model,
+      [{ role: 'user', content: 'Reply with exactly: OK' }], 16);
+    tr.className = 'text-xs mb-3 text-emerald-600';
+    tr.textContent = '✓ Connected. Model replied: ' + (text || '').trim().slice(0, 60);
+  } catch (e) {
+    tr.className = 'text-xs mb-3 text-rose-600';
+    tr.textContent = '✗ ' + e.message;
+  }
 }
 
-// Start
-render();
+/* ================= INIT ================= */
+(function init() {
+  if (typeof pdfjsLib !== 'undefined') {
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+
+  loadState();
+  render();
+
+  // Keyboard shortcuts for modals
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      closeSettings();
+      closeNewProject();
+    }
+    if (e.key === 'Enter') {
+      if (!$('#modalNewProject').classList.contains('hidden') && document.activeElement === $('#newProjName')) {
+        confirmNewProject();
+      }
+      if (!$('#modalSettings').classList.contains('hidden') && document.activeElement === $('#setEndpoint')) {
+        saveSettings();
+      }
+    }
+  });
+
+  // Close modals on backdrop click
+  ['modalSettings', 'modalNewProject'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('click', e => { if (e.target === el) el.classList.add('hidden'); });
+  });
+})();
 </script>
 </body>
 </html>
