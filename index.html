@@ -20,9 +20,7 @@
   };
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<!-- pdf.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<!-- Tesseract.js for OCR (Scanned PDFs) -->
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 <style>
   summary::-webkit-details-marker { display: none; }
@@ -33,13 +31,11 @@
   ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
   ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
   .loader { border-top-color: #004AAD; -webkit-animation: spinner 1.5s linear infinite; animation: spinner 1.5s linear infinite; }
-  @-webkit-keyframes spinner { 0% { -webkit-transform: rotate(0deg); } 100% { -webkit-transform: rotate(360deg); } }
   @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 </style>
 </head>
 <body class="bg-[#F8FAFC] min-h-screen antialiased text-slate-800 font-sans flex flex-col">
 
-<!-- ============ GLOBAL HEADER ============ -->
 <header class="bg-gradient-to-r from-[#004AAD] to-[#2563EB] text-white sticky top-0 z-40 shadow-lg">
   <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
     <button onclick="goHome()" class="flex items-center gap-3 text-left focus:outline-none">
@@ -50,10 +46,7 @@
       </span>
     </button>
     <button onclick="openSettings()" class="flex items-center gap-2 text-sm bg-white/10 hover:bg-white/20 px-4 py-2 rounded-xl transition backdrop-blur-sm border border-white/10" title="API Settings">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="3"/>
-        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-      </svg>
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       <span class="hidden sm:inline font-medium">API Settings</span>
     </button>
   </div>
@@ -66,19 +59,11 @@
       <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
       <div class="relative z-10 md:w-2/3">
         <h1 class="text-3xl md:text-4xl font-bold mb-3 tracking-tight">Streamline your Contract Analysis</h1>
-        <p class="text-blue-100 mb-6 text-sm md:text-base leading-relaxed max-w-xl">
-          Upload your GCC, SCC, and VO documents. Let AI extract key dates, clauses, and verify Security of Payment (Cap. 652) compliance automatically.
-        </p>
-        <button onclick="openNewProject()" class="bg-white text-brand font-bold px-6 py-3 rounded-xl hover:bg-blue-50 transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
-          + Create New Project
-        </button>
+        <p class="text-blue-100 mb-6 text-sm md:text-base leading-relaxed max-w-xl">Upload your GCC, SCC, and VO documents. Let AI extract key dates, clauses, and verify Security of Payment (Cap. 652) compliance automatically.</p>
+        <button onclick="openNewProject()" class="bg-white text-brand font-bold px-6 py-3 rounded-xl hover:bg-blue-50 transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">+ Create New Project</button>
       </div>
     </div>
-
-    <div class="flex items-center justify-between mb-4">
-      <h2 class="text-xl font-bold text-slate-900">Recent Projects</h2>
-    </div>
-
+    <div class="flex items-center justify-between mb-4"><h2 class="text-xl font-bold text-slate-900">Project Overview</h2></div>
     <div id="projectGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
   </section>
 
@@ -86,101 +71,54 @@
   <section id="view-workspace" class="hidden max-w-7xl mx-auto px-4 py-6">
     <div class="flex items-center gap-4 mb-6 flex-wrap">
       <button onclick="goHome()" class="flex items-center gap-2 text-sm text-slate-600 hover:text-brand bg-white border border-slate-200 px-4 py-2 rounded-xl shadow-sm transition hover:bg-slate-50">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-        Projects
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>Projects
       </button>
-      <div>
-        <h1 id="projTitle" class="text-2xl font-bold text-slate-900"></h1>
-        <span id="projMeta" class="text-xs font-medium text-slate-500"></span>
-      </div>
+      <div><h1 id="projTitle" class="text-2xl font-bold text-slate-900"></h1><span id="projMeta" class="text-xs font-medium text-slate-500"></span></div>
     </div>
-    
     <div id="tabBar" class="flex gap-1 overflow-x-auto pb-2 mb-6 border-b border-slate-200 scrollbar-hide"></div>
     <div id="panelHost" class="min-h-[500px]"></div>
   </section>
 </main>
 
-<!-- ============ MODAL: API SETTINGS ============ -->
+<!-- ============ MODALS ============ -->
 <div id="modalSettings" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
   <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 transform transition-all">
-    <div class="flex items-start justify-between mb-1">
-      <h2 class="text-xl font-bold text-slate-900">API Settings</h2>
-      <button onclick="closeSettings()" class="text-slate-400 hover:text-slate-700 text-2xl leading-none -mt-1 focus:outline-none">×</button>
-    </div>
+    <div class="flex items-start justify-between mb-1"><h2 class="text-xl font-bold text-slate-900">API Settings</h2><button onclick="closeSettings()" class="text-slate-400 hover:text-slate-700 text-2xl leading-none -mt-1 focus:outline-none">×</button></div>
     <p class="text-xs text-slate-500 mb-5">Connect to any OpenAI-compatible endpoint (DeepSeek, Moyu, OpenAI). Data is stored locally in your browser.</p>
-
     <div class="space-y-4">
-      <div>
-        <label class="block text-xs font-bold text-slate-700 mb-1.5">Endpoint URL</label>
-        <input id="setEndpoint" type="text" placeholder="https://api.deepseek.com/v1"
-          class="w-full px-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition">
-      </div>
-      <div>
-        <label class="block text-xs font-bold text-slate-700 mb-1.5">API Key</label>
-        <input id="setApiKey" type="password" placeholder="sk-..."
-          class="w-full px-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition">
-      </div>
-      <div>
-        <label class="block text-xs font-bold text-slate-700 mb-1.5">Model Name</label>
-        <input id="setModel" type="text" placeholder="deepseek-chat"
-          class="w-full px-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition">
-      </div>
+      <div><label class="block text-xs font-bold text-slate-700 mb-1.5">Endpoint URL</label><input id="setEndpoint" type="text" placeholder="https://api.deepseek.com/v1" class="w-full px-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition"></div>
+      <div><label class="block text-xs font-bold text-slate-700 mb-1.5">API Key</label><input id="setApiKey" type="password" placeholder="sk-..." class="w-full px-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition"></div>
+      <div><label class="block text-xs font-bold text-slate-700 mb-1.5">Model Name</label><input id="setModel" type="text" placeholder="deepseek-chat" class="w-full px-3 py-2.5 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition"></div>
     </div>
-
     <div id="testResult" class="text-xs mt-3 min-h-[1.25rem] font-medium"></div>
-
     <div class="flex items-center gap-3 mt-6">
       <button onclick="testConnection()" class="text-sm font-semibold px-4 py-2.5 rounded-xl border-2 border-slate-200 text-slate-700 hover:bg-slate-50 transition">Test Connection</button>
-      <div class="ml-auto flex gap-2">
-        <button onclick="closeSettings()" class="text-sm font-medium px-4 py-2.5 rounded-xl text-slate-500 hover:bg-slate-100 transition">Cancel</button>
-        <button onclick="saveSettings()" class="text-sm font-bold px-6 py-2.5 rounded-xl bg-brand text-white hover:bg-brand-dark shadow-md transition">Save</button>
-      </div>
+      <div class="ml-auto flex gap-2"><button onclick="closeSettings()" class="text-sm font-medium px-4 py-2.5 rounded-xl text-slate-500 hover:bg-slate-100 transition">Cancel</button><button onclick="saveSettings()" class="text-sm font-bold px-6 py-2.5 rounded-xl bg-brand text-white hover:bg-brand-dark shadow-md transition">Save</button></div>
     </div>
-    
-    <div class="border-t border-slate-100 mt-6 pt-4 text-center">
-      <button onclick="if(confirm('Erase all projects and settings?')) { localStorage.clear(); location.reload(); }" class="text-[11px] text-rose-500 hover:underline">Reset App Data</button>
-    </div>
+    <div class="border-t border-slate-100 mt-6 pt-4 text-center"><button onclick="if(confirm('Erase all projects and settings?')) { localStorage.clear(); location.reload(); }" class="text-[11px] text-rose-500 hover:underline">Reset App Data</button></div>
   </div>
 </div>
 
-<!-- ============ MODAL: NEW PROJECT ============ -->
 <div id="modalNewProject" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
   <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 transform transition-all">
-    <h2 class="text-xl font-bold text-slate-900 mb-1">New Project</h2>
-    <p class="text-xs text-slate-500 mb-4">e.g. “Contract 1234 – Hospital Extension”.</p>
-    <input id="newProjName" type="text" placeholder="Project name"
-      class="w-full px-4 py-3 border border-slate-300 rounded-xl text-sm mb-5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition">
-    <div class="flex justify-end gap-2">
-      <button onclick="closeNewProject()" class="text-sm font-medium px-4 py-2.5 rounded-xl text-slate-500 hover:bg-slate-100 transition">Cancel</button>
-      <button onclick="confirmNewProject()" class="text-sm font-bold px-6 py-2.5 rounded-xl bg-brand text-white hover:bg-brand-dark shadow-md transition">Create</button>
-    </div>
+    <h2 class="text-xl font-bold text-slate-900 mb-1">New Project</h2><p class="text-xs text-slate-500 mb-4">e.g. “Contract 1234 – Hospital Extension”.</p>
+    <input id="newProjName" type="text" placeholder="Project name" class="w-full px-4 py-3 border border-slate-300 rounded-xl text-sm mb-5 focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition">
+    <div class="flex justify-end gap-2"><button onclick="closeNewProject()" class="text-sm font-medium px-4 py-2.5 rounded-xl text-slate-500 hover:bg-slate-100 transition">Cancel</button><button onclick="confirmNewProject()" class="text-sm font-bold px-6 py-2.5 rounded-xl bg-brand text-white hover:bg-brand-dark shadow-md transition">Create</button></div>
   </div>
 </div>
 
-<!-- ============ MODAL: MANUAL TEXT FALLBACK ============ -->
 <div id="modalManualText" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
   <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl p-6 transform transition-all flex flex-col max-h-[90vh]">
-    <div class="flex items-start justify-between mb-2">
-      <h2 class="text-xl font-bold text-slate-900">Paste Text Manually</h2>
-      <button onclick="closeManualText()" class="text-slate-400 hover:text-slate-700 text-2xl leading-none focus:outline-none">×</button>
-    </div>
+    <div class="flex items-start justify-between mb-2"><h2 class="text-xl font-bold text-slate-900">Paste Text Manually</h2><button onclick="closeManualText()" class="text-slate-400 hover:text-slate-700 text-2xl leading-none focus:outline-none">×</button></div>
     <p class="text-xs text-slate-500 mb-4">If OCR fails, open your PDF, select all text (Ctrl+A / Cmd+A), copy it, and paste it here.</p>
     <textarea id="manualTextArea" class="w-full flex-1 min-h-[200px] p-4 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand transition resize-none font-mono" placeholder="Paste contract text here..."></textarea>
-    <div class="flex justify-end gap-2 mt-4">
-      <button onclick="closeManualText()" class="text-sm font-medium px-4 py-2.5 rounded-xl text-slate-500 hover:bg-slate-100 transition">Cancel</button>
-      <button onclick="saveManualText()" class="text-sm font-bold px-6 py-2.5 rounded-xl bg-brand text-white hover:bg-brand-dark shadow-md transition">Save Text</button>
-    </div>
+    <div class="flex justify-end gap-2 mt-4"><button onclick="closeManualText()" class="text-sm font-medium px-4 py-2.5 rounded-xl text-slate-500 hover:bg-slate-100 transition">Cancel</button><button onclick="saveManualText()" class="text-sm font-bold px-6 py-2.5 rounded-xl bg-brand text-white hover:bg-brand-dark shadow-md transition">Save Text</button></div>
   </div>
 </div>
 
-<!-- ============ TOAST ============ -->
 <div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] text-white text-sm font-medium px-6 py-3 rounded-xl shadow-2xl max-w-[90vw] transition-all duration-300 transform translate-y-4 opacity-0"></div>
 
 <script>
-/* =========================================================
-   QS SMART AI — pure frontend SPA
-   ========================================================= */
-
 window.onerror = function(msg, url, lineNo, columnNo, error) {
   console.error(error);
   const errDiv = document.createElement('div');
@@ -200,7 +138,9 @@ const state = {
   tab: 'doc',
   sopPeriod: 30,
   busy: false,
-  targetFileIdForManualText: null
+  targetFileIdForManualText: null,
+  fileSort: 'date_desc',
+  groupByType: false
 };
 
 const TABS = [
@@ -248,13 +188,8 @@ function fmtBytes(n) {
   return (n / 1048576).toFixed(1) + ' MB';
 }
 function badge(label, cls) {
-  const map = {
-    emerald: 'bg-emerald-100 text-emerald-700 border border-emerald-200',
-    rose:    'bg-rose-100 text-rose-700 border border-rose-200',
-    amber:   'bg-amber-100 text-amber-700 border border-amber-200',
-    slate:   'bg-slate-100 text-slate-600 border border-slate-200',
-  };
-  return `<span class="inline-flex items-center justify-center text-[11px] font-bold px-2.5 py-0.5 rounded-full ${map[cls] || map.slate}">${esc(label)}</span>`;
+  const map = { emerald: 'bg-emerald-100 text-emerald-700 border-emerald-200', rose: 'bg-rose-100 text-rose-700 border-rose-200', amber: 'bg-amber-100 text-amber-700 border-amber-200', slate: 'bg-slate-100 text-slate-600 border-slate-200' };
+  return `<span class="inline-flex items-center justify-center text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${map[cls] || map.slate}">${esc(label)}</span>`;
 }
 function emptyState(iconSvg, title, sub, actionHtml = '') {
   return `<div class="flex flex-col items-center justify-center py-12 px-4 text-center">
@@ -273,10 +208,7 @@ function toast(msg, type = 'info') {
   el.textContent = msg;
   el.classList.remove('hidden');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => {
-    el.classList.add('translate-y-4', 'opacity-0');
-    setTimeout(() => el.classList.add('hidden'), 300);
-  }, 4000);
+  toastTimer = setTimeout(() => { el.classList.add('translate-y-4', 'opacity-0'); setTimeout(() => el.classList.add('hidden'), 300); }, 4000);
 }
 
 function loadState() {
@@ -284,11 +216,8 @@ function loadState() {
   try { state.settings = Object.assign({ endpoint: '', apiKey: '', model: 'deepseek-chat' }, JSON.parse(localStorage.getItem(LS_SETTINGS) || '{}')); } catch (e) {}
 }
 function saveProjects() {
-  try {
-    localStorage.setItem(LS_PROJECTS, JSON.stringify(state.projects));
-  } catch (e) {
-    toast('Storage limit reached — some large files were not saved.', 'warn');
-  }
+  try { localStorage.setItem(LS_PROJECTS, JSON.stringify(state.projects)); } 
+  catch (e) { toast('Storage limit reached — some data was not saved.', 'warn'); }
 }
 function currentProject() { return state.projects.find(p => p.id === state.currentId) || null; }
 function touch(p) { p.updatedAt = Date.now(); }
@@ -305,6 +234,7 @@ function render() {
   }
 }
 
+/* ================= HOME: 项目概览卡片 ================= */
 function renderHome() {
   const grid = $('#projectGrid');
   if (!state.projects.length) {
@@ -313,7 +243,21 @@ function renderHome() {
     </div>`;
     return;
   }
-  grid.innerHTML = state.projects.map(p => `
+  
+  grid.innerHTML = state.projects.map(p => {
+    let voCount = 0, totalAmount = 0, overdueCount = 0;
+    
+    // 提取项目概览统计
+    if (p.analysis && p.analysis.vo_details) {
+      voCount = p.analysis.vo_details.length;
+      p.analysis.vo_details.forEach(vo => {
+        const cleanAmount = (vo.amount || '').replace(/[^0-9.]/g, '');
+        if (cleanAmount) totalAmount += parseFloat(cleanAmount);
+        if (vo.sop_check && vo.sop_check.toLowerCase().includes('overdue')) overdueCount++;
+      });
+    }
+
+    return `
     <div class="group relative bg-white rounded-2xl border border-slate-200 p-6 hover:shadow-xl hover:border-brand/40 transition-all duration-200 cursor-pointer flex flex-col h-full" onclick="openProject('${p.id}')">
       <div class="flex items-start justify-between mb-4">
         <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-light to-blue-100 grid place-items-center text-brand font-bold text-lg shadow-sm border border-blue-200/50">
@@ -324,12 +268,25 @@ function renderHome() {
         </button>
       </div>
       <h3 class="font-bold text-lg text-slate-900 truncate mb-1">${esc(p.name)}</h3>
-      <p class="text-sm text-slate-500 mb-4 flex-1">${(p.files || []).length} file(s) · ${p.analysis ? '<span class="text-emerald-600 font-medium">Analyzed</span>' : 'Not analyzed'}</p>
-      <div class="flex items-center justify-between text-[11px] font-medium text-slate-400 pt-4 border-t border-slate-100">
+      
+      <!-- 概览数据徽章 -->
+      ${p.analysis ? `
+        <div class="flex flex-wrap gap-2 mt-2 mb-4 text-[11px] font-bold">
+          <span class="bg-slate-100 text-slate-600 px-2 py-1 rounded-md border border-slate-200">${(p.files || []).length} Files</span>
+          <span class="bg-blue-50 text-blue-700 px-2 py-1 rounded-md border border-blue-200">${voCount} VOs</span>
+          <span class="bg-emerald-50 text-emerald-700 px-2 py-1 rounded-md border border-emerald-200">HKD ${totalAmount.toLocaleString('en-US', {maximumFractionDigits: 0})}</span>
+          ${overdueCount > 0 ? `<span class="bg-rose-50 text-rose-700 px-2 py-1 rounded-md border border-rose-200">${overdueCount} Overdue</span>` : ''}
+        </div>
+      ` : `
+        <p class="text-sm text-slate-500 mb-4 flex-1">${(p.files || []).length} file(s) · Not analyzed</p>
+      `}
+
+      <div class="flex items-center justify-between text-[11px] font-medium text-slate-400 pt-4 border-t border-slate-100 mt-auto">
         <span>Updated ${new Date(p.updatedAt || p.createdAt).toLocaleDateString('en-GB')}</span>
         <span class="text-brand flex items-center gap-1 group-hover:translate-x-1 transition-transform">Open &rarr;</span>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function renderWorkspace() {
@@ -360,20 +317,12 @@ function closeNewProject() { $('#modalNewProject').classList.add('hidden'); }
 function confirmNewProject() {
   const name = ($('#newProjName').value || '').trim() || 'Untitled Project';
   const p = { id: uid(), name, createdAt: Date.now(), updatedAt: Date.now(), files: [], analysis: null, analyzedAt: null };
-  state.projects.unshift(p);
-  saveProjects();
-  closeNewProject();
-  state.currentId = p.id;
-  state.tab = 'doc';
-  render();
+  state.projects.unshift(p); saveProjects(); closeNewProject(); state.currentId = p.id; state.tab = 'doc'; render();
 }
 function deleteProject(e, id) {
-  e.stopPropagation();
-  if (!confirm('Delete this project and all of its saved data?')) return;
-  state.projects = state.projects.filter(p => p.id !== id);
-  if (state.currentId === id) state.currentId = null;
-  saveProjects();
-  render();
+  e.stopPropagation(); if (!confirm('Delete this project and all of its saved data?')) return;
+  state.projects = state.projects.filter(p => p.id !== id); if (state.currentId === id) state.currentId = null;
+  saveProjects(); render();
 }
 
 function renderPanel(tab, p) {
@@ -391,8 +340,8 @@ function noAnalysis() {
   return `<div class="bg-white rounded-2xl border border-slate-200 shadow-sm">${emptyState('🤖', 'No analysis yet', 'Go to the Documents tab, upload your PDFs, and click “Analyze with AI”.')}</div>`;
 }
 
-/* ================= TAB 1: DOCUMENTS & OCR ================= */
-function fileRow(f) {
+/* ================= TAB 1: DOCUMENTS ================= */
+function fileRow(f, aiDoc) {
   let statusColor = 'text-slate-400';
   if (f.status === 'reading') statusColor = 'text-amber-600';
   if (f.status === 'ocr') statusColor = 'text-blue-600';
@@ -401,14 +350,10 @@ function fileRow(f) {
 
   return `<div class="flex flex-col gap-2 p-3 rounded-xl border border-slate-200 bg-white shadow-sm">
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-lg ${/\.pdf$/i.test(f.name) ? 'bg-rose-50 text-rose-600' : 'bg-blue-50 text-blue-600'} grid place-items-center text-[10px] font-bold shrink-0">
-        ${/\.pdf$/i.test(f.name) ? 'PDF' : 'TXT'}
-      </div>
+      <div class="w-10 h-10 rounded-lg ${/\.pdf$/i.test(f.name) ? 'bg-rose-50 text-rose-600' : 'bg-blue-50 text-blue-600'} grid place-items-center text-[10px] font-bold shrink-0">${/\.pdf$/i.test(f.name) ? 'PDF' : 'TXT'}</div>
       <div class="min-w-0 flex-1">
         <div class="text-sm font-semibold text-slate-800 truncate" title="${esc(f.name)}">${esc(f.name)}</div>
-        <div class="text-[11px] font-medium text-slate-400 mt-0.5">
-          ${fmtBytes(f.size)} · <span data-file-status="${f.id}" class="${statusColor}">${esc(f.progress || 'Ready')}</span>
-        </div>
+        <div class="text-[11px] font-medium text-slate-400 mt-0.5">${fmtBytes(f.size)} · <span data-file-status="${f.id}" class="${statusColor}">${esc(f.progress || 'Ready')}</span></div>
       </div>
       <button onclick="removeFile('${f.id}')" class="text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition p-2 rounded-lg shrink-0" title="Remove">✕</button>
     </div>
@@ -418,6 +363,16 @@ function fileRow(f) {
         <button onclick="openManualText('${f.id}')" class="font-bold underline hover:text-amber-900 shrink-0">Paste Text</button>
       </div>
     ` : ''}
+    <!-- 单文件 AI 总结 -->
+    ${aiDoc && aiDoc.summary ? `
+      <div class="mt-2 bg-slate-50/80 rounded-lg p-3 border border-slate-100">
+        <div class="text-[10px] font-bold text-brand mb-1 flex items-center gap-1">
+          <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"></path></svg>
+          QS 阅读摘要
+        </div>
+        <p class="text-xs text-slate-600 leading-relaxed">${esc(aiDoc.summary)}</p>
+      </div>
+    ` : ''}
   </div>`;
 }
 
@@ -425,11 +380,28 @@ function panelDoc(p) {
   const files = p.files || [];
   const a = p.analysis;
   
+  // 排序逻辑
+  let sortedFiles = [...files];
+  if (state.fileSort === 'name_asc') sortedFiles.sort((a,b) => a.name.localeCompare(b.name));
+  else if (state.fileSort === 'size_desc') sortedFiles.sort((a,b) => b.size - a.size);
+  else if (state.fileSort === 'date_desc') sortedFiles.reverse();
+  
   return `
   <div class="grid lg:grid-cols-2 gap-6">
     <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col">
-      <h2 class="text-lg font-bold text-slate-800">1. Upload Documents</h2>
-      <p class="text-xs text-slate-500 mt-1 mb-5">PDFs are scanned locally. If a PDF is scanned/image-based, OCR will run automatically.</p>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold text-slate-800">1. Upload Documents</h2>
+        <!-- 文件整理工具栏 -->
+        <div class="flex gap-2">
+          <select onchange="state.fileSort = this.value; renderWorkspace();" class="text-xs border border-slate-200 rounded-lg px-2 py-1 outline-none focus:border-brand">
+            <option value="date_desc" ${state.fileSort === 'date_desc' ? 'selected' : ''}>最新上传</option>
+            <option value="date_asc" ${state.fileSort === 'date_asc' ? 'selected' : ''}>最早上传</option>
+            <option value="name_asc" ${state.fileSort === 'name_asc' ? 'selected' : ''}>按名称</option>
+            <option value="size_desc" ${state.fileSort === 'size_desc' ? 'selected' : ''}>按大小</option>
+          </select>
+        </div>
+      </div>
+      <p class="text-xs text-slate-500 mb-4">PDFs are scanned locally. If a PDF is scanned/image-based, OCR will run automatically.</p>
 
       <div id="dropzone" tabindex="0" class="border-2 border-dashed border-slate-300 rounded-2xl p-8 text-center cursor-pointer hover:border-brand hover:bg-brand-light/30 transition-all duration-200 outline-none focus:border-brand group flex flex-col items-center justify-center">
         <div class="w-16 h-16 mb-4 rounded-full bg-slate-50 flex items-center justify-center group-hover:bg-white group-hover:scale-110 transition-transform">
@@ -440,8 +412,15 @@ function panelDoc(p) {
         <input id="fileInput" type="file" multiple accept=".pdf,.txt,application/pdf,text/plain" class="hidden">
       </div>
 
-      <div class="mt-5 space-y-2 max-h-[300px] overflow-y-auto pr-1">
-        ${files.length ? files.map(fileRow).join('') : '<p class="text-sm text-slate-400 text-center py-4">No documents uploaded yet.</p>'}
+      <div class="mt-5 space-y-2 max-h-[400px] overflow-y-auto pr-1">
+        ${sortedFiles.length ? sortedFiles.map(f => {
+          // 匹配 AI 文件总结
+          let aiDoc = null;
+          if (a && a.documents) {
+            aiDoc = a.documents.find(d => d.name === f.name || f.name.includes(d.name) || d.name.includes(f.name));
+          }
+          return fileRow(f, aiDoc);
+        }).join('') : '<p class="text-sm text-slate-400 text-center py-4">No documents uploaded yet.</p>'}
       </div>
     </div>
 
@@ -455,6 +434,9 @@ function panelDoc(p) {
           ${state.busy ? '<div class="w-4 h-4 rounded-full loader border-2 border-white border-t-transparent"></div> Analyzing...' : 'Analyze with AI'}
         </button>
       </div>
+      
+      <!-- 分析进度提示 -->
+      ${state.busy && state.batchInfo ? `<div class="bg-blue-50 text-blue-800 text-xs p-3 rounded-lg mb-4 animate-pulse border border-blue-100 font-medium">${state.batchInfo}</div>` : ''}
 
       <div class="flex-1 space-y-3 overflow-y-auto pr-1">
         ${a ? (a.documents && a.documents.length ? a.documents.map(docCard).join('') : '<p class="text-sm text-slate-400 text-center py-4">AI returned no document classifications.</p>') 
@@ -475,7 +457,7 @@ function docCard(d) {
   </div>`;
 }
 
-/* ================= TAB 2, 3, 4, 5 (Keep original logic, just styled) ================= */
+/* ================= TAB 2-5 (基础渲染保持原样) ================= */
 function panelDates(p) {
   const a = p.analysis; if (!a) return noAnalysis();
   const dates = a.key_dates || [], clauses = a.key_clauses || [];
@@ -512,8 +494,6 @@ function panelTimer(p) {
     <div id="timerTable">${vos.length ? `<div class="overflow-x-auto rounded-xl border border-slate-200"><table class="w-full text-sm text-left"><thead class="bg-slate-50 text-[11px] uppercase text-slate-500"><tr><th class="py-3 px-4 font-bold">VO No.</th><th class="py-3 px-4 font-bold">Date Issued</th><th class="py-3 px-4 font-bold">Date Submitted</th><th class="py-3 px-4 font-bold">Computation</th><th class="py-3 px-4 font-bold">SOP Status</th></tr></thead><tbody class="divide-y divide-slate-100">${vos.map(vo => { const st = sopStatus(vo, state.sopPeriod); return `<tr><td class="py-3 px-4 font-bold text-slate-800">${esc(vo.vo_number || '—')}</td><td class="py-3 px-4">${fmtDate(vo.date_issued)}</td><td class="py-3 px-4">${fmtDate(vo.date_submitted)}</td><td class="py-3 px-4 text-xs">${esc(st.detail)}</td><td class="py-3 px-4">${badge(st.label, st.cls)}</td></tr>`; }).join('')}</tbody></table></div>` : emptyState('⏱️', 'No VO records', 'Run AI analysis to populate.')}</div>
   </div>`;
 }
-function updateTimerTable() { const p = currentProject(); if (!p) return; const period = parseInt($('#sopPeriod').value, 10) || 30; state.sopPeriod = period; $('#timerTable').innerHTML = panelTimer(p).match(/<div id="timerTable">([\s\S]*?)<\/div><\/div>/)[1].replace('<div id="timerTable">', ''); }
-// Fix regex parsing for updateTimerTable
 function updateTimerTable() {
   const p = currentProject(); if (!p) return;
   const period = parseInt($('#sopPeriod').value, 10) || 30; state.sopPeriod = period;
@@ -583,20 +563,14 @@ async function extractPdfText(file, onProgress) {
     const page = await pdf.getPage(i);
     const content = await page.getTextContent();
     let pageText = content.items.map(it => it.str).join(' ').trim();
-
-    // If text is too short, it's probably a scanned image -> Run OCR
-    if (pageText.length < 20) {
+    if (pageText.length < 20) { // OCR Fallback
       if (onProgress) onProgress(i, pdf.numPages, 'ocr', 0);
       const viewport = page.getViewport({ scale: 1.5 });
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      canvas.height = viewport.height;
-      canvas.width = viewport.width;
+      canvas.height = viewport.height; canvas.width = viewport.width;
       await page.render({ canvasContext: ctx, viewport }).promise;
-      
-      const result = await Tesseract.recognize(canvas, 'eng', {
-        logger: m => { if (m.status === 'recognizing text' && onProgress) onProgress(i, pdf.numPages, 'ocr', Math.round(m.progress * 100)); }
-      });
+      const result = await Tesseract.recognize(canvas, 'eng', { logger: m => { if (m.status === 'recognizing text' && onProgress) onProgress(i, pdf.numPages, 'ocr', Math.round(m.progress * 100)); } });
       pageText = result.data.text;
     }
     out += pageText + '\n\n';
@@ -617,18 +591,14 @@ async function handleFiles(fileList) {
           const msg = mode === 'ocr' ? `OCR: Page ${cur}/${total} (${pct}%)` : `Reading: Page ${cur}/${total}`;
           setFileStatus(rec.id, msg, mode === 'ocr' ? 'text-blue-600 font-bold' : 'text-amber-600 font-bold');
         });
-      } else {
-        text = await file.text();
-      }
+      } else { text = await file.text(); }
       rec.text = (text || '').trim();
       rec.status = rec.text.length > 10 ? 'ready' : 'error';
       rec.progress = rec.text.length > 10 ? `${rec.text.length.toLocaleString()} chars` : 'No text extractable';
-    } catch (err) {
-      rec.status = 'error'; rec.progress = err.message || 'Failed to read';
-    }
+    } catch (err) { rec.status = 'error'; rec.progress = err.message || 'Failed to read'; }
     touch(p); saveProjects(); render();
   }
-  toast('Documents processed. Click "Analyze with AI" to continue.', 'ok');
+  toast('Documents processed. Ready for AI analysis.', 'ok');
 }
 
 function removeFile(id) {
@@ -636,11 +606,9 @@ function removeFile(id) {
   p.files = (p.files || []).filter(f => f.id !== id); touch(p); saveProjects(); render();
 }
 
-/* ================= MANUAL TEXT MODAL ================= */
 function openManualText(fileId) {
   state.targetFileIdForManualText = fileId;
-  const p = currentProject();
-  const f = p.files.find(x => x.id === fileId);
+  const p = currentProject(), f = p.files.find(x => x.id === fileId);
   $('#manualTextArea').value = f && f.text ? f.text : '';
   $('#modalManualText').classList.remove('hidden');
 }
@@ -657,16 +625,16 @@ function saveManualText() {
   }
 }
 
-/* ================= AI INTEGRATION ================= */
-const SYSTEM_PROMPT = `You are "QS SMART AI", a senior Quantity Surveyor and contracts analyst specialising in Hong Kong construction contracts (HKIA / HKIS GCC and SCC) and the Security of Payment Ordinance (Cap. 652).
+/* ================= 🚀 核心：强化 AI 与分批处理 ================= */
 
-Analyse the supplied construction documents and return ONE raw JSON object.
+// 强化了身份、专业术语、以及对单文件进行 QS 总结的要求
+const SYSTEM_PROMPT = `You are "QS SMART AI", a senior registered Quantity Surveyor (RQS) and contracts expert with 20 years of experience in Hong Kong. You specialise in HKIA/HKIS standard forms, GCC/SCC, and the Security of Payment Ordinance (Cap. 652).
+Your job is to act as a strict, analytical QS reviewing construction documents.
 
 ABSOLUTE OUTPUT RULES:
-- Output RAW JSON ONLY. No markdown, no \`\`\`json fences, no commentary.
-- The response must start with { and end with }.
+- Output RAW JSON ONLY. No markdown, no \`\`\`json fences, no commentary. Start with { and end with }.
 - Use valid JSON: double quotes only, no trailing commas.
-- If a value is unknown, use an empty string "" or an empty array [].
+- If a value is unknown, use "" or [].
 
 REQUIRED SCHEMA:
 {
@@ -677,20 +645,19 @@ REQUIRED SCHEMA:
   "scc_gcc_mapping": [{"scc_ref": "string", "gcc_ref": "string", "change": "string"}]
 }
 
-CLASSIFICATION RULES:
-- "GCC" = General Conditions.
-- "SCC" = Special Conditions.
-- "VO" = Variation Order.
-- "AI" = Architect's Instructions.
-- "Other" = anything else.
+PROFESSIONAL ANALYSIS RULES:
+1. "summary" per document: This must be highly relevant to a QS. Mention if the document contains: Payment terms, EOT provisions, Liquidated Damages (LD) rates, VO valuation methods, or specific measurement standards (e.g., HKIS, CESMM). Do NOT just say "this is a contract". Tell the QS what to look out for.
+2. "key_clauses": Focus heavily on cost and time impact. Look for clauses altered by the SCC that increase QS risk (e.g., removing a right to EOT, changing fluctuation formulas).
+3. "amount": Always format as "HKD X,XXX,XXX". 
+4. "sop_check": Compare "date_issued" and "date_submitted". If the difference exceeds 30 days (or a period explicitly stated in the SCC), flag it as "Overdue".
+5. Be objective. Never invent clause numbers. If a VO amount is missing, leave it as "".
 
-ANALYSIS RULES:
-- Extract key_dates (milestones, deadlines, VO issues).
-- Extract key_clauses (SCC alterations vs GCC).
-- Extract vo_details (one per VO, amount, dates, compliance).
-- Extract scc_gcc_mapping.
+Base every answer strictly on the supplied text.`;
 
-Base every answer strictly on the supplied text. Never invent clause numbers or dates.`;
+// 用于单文件深度分析的 Prompt（在分批处理时使用）
+const FILE_SUMMARY_PROMPT = `You are a senior QS in Hong Kong. Review this specific document. Extract its type (GCC/SCC/VO/AI/Other) and write a high-level summary specifically tailored for a Quantity Surveyor. Focus on: Payment terms, EOT mechanisms, VO valuation, Liquidated Damages, and any Cap. 652 implications. 
+Return RAW JSON ONLY matching this schema:
+{"name": "string", "type": "string", "summary": "string"}`;
 
 function normalizeEndpoint(url) {
   let u = (url || '').trim(); if (!u) throw new Error('API endpoint is empty');
@@ -723,48 +690,83 @@ function parseAIJson(raw) {
   try { return JSON.parse(s); } catch (e) { return JSON.parse(s.replace(/,\s*([}\]])/g, '$1')); }
 }
 
-function normalizeAnalysis(o) {
-  const arr = v => Array.isArray(v) ? v : [];
-  return {
-    documents: arr(o.documents).map(d => ({ name: d.name || '', type: d.type || 'Other', summary: d.summary || '' })),
-    key_dates: arr(o.key_dates).map(d => ({ date: d.date || '', event: d.event || '', source: d.source || '' })),
-    key_clauses: arr(o.key_clauses).map(c => ({ clause: c.clause || '', source: c.source || '', text: c.text || '', impact: c.impact || '' })),
-    vo_details: arr(o.vo_details).map(v => ({ vo_number: v.vo_number || '', amount: v.amount || '', date_issued: v.date_issued || '', date_submitted: v.date_submitted || '', status: v.status || '', sop_check: v.sop_check || '' })),
-    scc_gcc_mapping: arr(o.scc_gcc_mapping).map(m => ({ scc_ref: m.scc_ref || '', gcc_ref: m.gcc_ref || '', change: m.change || '' }))
-  };
-}
-
 async function analyzeProject() {
   const p = currentProject(); if (!p) return;
   const ready = (p.files || []).filter(f => f.text && f.text.trim().length > 10);
   
-  if (!ready.length) {
-    toast('Upload at least one document with extracted text first.', 'warn');
-    return;
-  }
+  if (!ready.length) { toast('Upload at least one document with extracted text first.', 'warn'); return; }
 
-  const LIMIT = 40000;
-  let combined = '';
-  for (const f of ready) {
-    const block = `\n\n===== FILE: ${f.name} =====\n${f.text}`;
-    if (combined.length + block.length > LIMIT) { combined += block.slice(0, Math.max(0, LIMIT - combined.length)); break; }
-    combined += block;
-  }
-
-  state.busy = true; renderWorkspace();
+  state.busy = true; state.batchInfo = ''; renderWorkspace();
 
   try {
-    const raw = await callAPIRaw(state.settings.endpoint, state.settings.apiKey, state.settings.model, [
-      { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user', content: `Analyze these project documents:\n${combined}` }
-    ]);
-    p.analysis = normalizeAnalysis(parseAIJson(raw));
+    const LIMIT = 30000; // 字符阈值，超过则触发分批
+    let totalChars = ready.reduce((sum, f) => sum + f.text.length, 0);
+    let finalDocumentsList = [];
+
+    // ==========================================
+    // 🚀 分批处理逻辑 (Map-Reduce)
+    // ==========================================
+    if (totalChars > LIMIT) {
+      state.batchInfo = '文件较大，正在进行分批智能分析（Map 阶段）...';
+      renderWorkspace();
+      
+      // 第一阶段：逐个文件请求 AI 摘要
+      const filePromises = ready.map(async (f) => {
+        try {
+          const raw = await callAPIRaw(state.settings.endpoint, state.settings.apiKey, state.settings.model, [
+            { role: 'system', content: FILE_SUMMARY_PROMPT },
+            { role: 'user', content: `File Name: ${f.name}\n\nText:\n${f.text.slice(0, 15000)}` } // 单文件限制 15k 字符防超限
+          ]);
+          return parseAIJson(raw);
+        } catch (e) {
+          console.warn("单文件分析失败:", f.name, e);
+          return { name: f.name, type: 'Other', summary: '解析失败，文本过长或 API 错误。' };
+        }
+      });
+
+      finalDocumentsList = await Promise.all(filePromises);
+
+      // 第二阶段：将所有文件的摘要合并，进行全局综合分析
+      state.batchInfo = '正在生成全局交叉分析报告（Reduce 阶段）...';
+      renderWorkspace();
+
+      const combinedSummaryText = finalDocumentsList.map(d => `[FILE: ${d.name}] - [TYPE: ${d.type}]\nSummary: ${d.summary}\n`).join('\n');
+      
+      const rawFinal = await callAPIRaw(state.settings.endpoint, state.settings.apiKey, state.settings.model, [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: `Based on the following extracted summaries of the contract files, generate the final JSON analysis. \n\nFILE SUMMARIES:\n${combinedSummaryText}\n\nNote: These are summaries. Deduce the Key Dates, Clauses, VOs, and SCC mappings based on your QS expertise from these summaries.` }
+      ]);
+
+      const finalJson = parseAIJson(rawFinal);
+      finalJson.documents = finalDocumentsList; // 覆盖为单文件提取的精确摘要
+      p.analysis = finalJson;
+
+    } else {
+      // ==========================================
+      // 常规单次处理逻辑
+      // ==========================================
+      state.batchInfo = '正在进行深度智能分析...';
+      renderWorkspace();
+
+      let combined = '';
+      for (const f of ready) {
+        const block = `\n\n===== FILE: ${f.name} =====\n${f.text}`;
+        combined += block;
+      }
+
+      const raw = await callAPIRaw(state.settings.endpoint, state.settings.apiKey, state.settings.model, [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: `Analyze these project documents:\n${combined}` }
+      ]);
+      p.analysis = parseAIJson(raw);
+    }
+
     p.analyzedAt = Date.now(); touch(p); saveProjects();
-    toast('Analysis complete — all tabs updated.', 'ok');
+    toast('分析完成 — 所有标签页已更新。', 'ok');
   } catch (e) {
-    toast('AI analysis failed: ' + e.message, 'error');
+    toast('AI 分析失败: ' + e.message, 'error');
   } finally {
-    state.busy = false; renderWorkspace();
+    state.busy = false; state.batchInfo = ''; renderWorkspace();
   }
 }
 
@@ -791,9 +793,7 @@ async function testConnection() {
   try {
     await callAPIRaw(ep, key, model, [{ role: 'user', content: 'Reply with exactly: OK' }], 16);
     tr.className = 'text-xs mt-3 font-bold text-emerald-600'; tr.textContent = '✓ Connected successfully!';
-  } catch (e) {
-    tr.className = 'text-xs mt-3 font-bold text-rose-600'; tr.textContent = '✗ ' + e.message;
-  }
+  } catch (e) { tr.className = 'text-xs mt-3 font-bold text-rose-600'; tr.textContent = '✗ ' + e.message; }
 }
 
 /* ================= INIT ================= */
