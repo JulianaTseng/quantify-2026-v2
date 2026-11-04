@@ -12,7 +12,8 @@
     :root { --blue-primary: #004AAD; --bg-main: #f4f7fa; }
     body { background: var(--bg-main); color: #1e293b; font-family: system-ui, -apple-system, sans-serif; }
     .card { background: white; border: 1px solid #d4e3f0; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0, 74, 173, 0.04); }
-    .tab { padding: 12px 18px; border-bottom: 3px solid transparent; font-weight: 600; font-size: 14px; color: #64748b; cursor: pointer; }
+    .tab { padding: 12px 18px; border-bottom: 3px solid transparent; font-weight: 600; font-size: 13px; color: #64748b; cursor: pointer; white-space: nowrap; transition: 0.2s; }
+    .tab:hover { color: var(--blue-primary); }
     .tab.active { border-color: var(--blue-primary); color: var(--blue-primary); background: #CBE6F7; }
     .section { display: none; }
     .section.active { display: block; }
@@ -20,14 +21,16 @@
     .btn:hover { background: #00337a; }
     .btn.secondary { background: #fff; color: var(--blue-primary); border: 1px solid var(--blue-primary); }
     .btn.secondary:hover { background: #CBE6F7; }
-    .btn.hero { background: var(--blue-primary); font-size: 13px; padding: 10px 18px; box-shadow: 0 4px 12px rgba(0, 74, 173, 0.25); }
     .input { width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 12px; outline: none; }
-    .input:focus { border-color: var(--blue-primary); }
-    .source { border-left: 3px solid var(--blue-primary); padding: 8px 12px; margin: 8px 0; background: #f0f7ff; font-size: 12px; }
-    mark.hl-query { background-color: #fbcfe8; color: #9d174d; font-weight: 700; padding: 1px 4px; border-radius: 4px; }
-    mark.hl-date { background-color: #CBE6F7; color: #004AAD; font-weight: 700; padding: 1px 4px; border-radius: 4px; }
+    .input:focus { border-color: var(--blue-primary); box-shadow: 0 0 0 2px #CBE6F7; }
     .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; }
     .modal { background: white; border-radius: 12px; width: 100%; max-width: 500px; padding: 24px; }
+    /* Accordion for VOs */
+    details { border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 10px; background: #fff; }
+    summary { padding: 12px 16px; font-weight: 600; cursor: pointer; background: #f8fafc; border-radius: 8px; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+    summary::-webkit-details-marker { display: none; }
+    details[open] summary { border-bottom: 1px solid #e2e8f0; border-radius: 8px 8px 0 0; }
+    .detail-content { padding: 16px; font-size: 13px; }
   </style>
 </head>
 <body>
@@ -42,15 +45,16 @@
       </div>
     </div>
     <div class="flex gap-2">
-      <button class="btn secondary" onclick="openSettings()">⚙️ API Settings</button>
+      <button class="btn secondary" onclick="openSettingsModal()">⚙️ API Settings</button>
     </div>
   </div>
   <!-- Main Nav Tabs (Only show in project view) -->
   <nav id="mainNav" class="max-w-7xl mx-auto px-4 flex overflow-x-auto border-t border-slate-100 hidden">
-    <button class="tab active" data-tab="upload">1. File Upload & Extraction</button>
-    <button class="tab" data-tab="results">2. AI Audit Dashboard</button>
-    <button class="tab" data-tab="search">3. Keyterm Search</button>
-    <button class="tab" data-tab="deadline-calc">4. Cap. 652 Timeline Calculator</button>
+    <button class="tab active" data-tab="tab1" onclick="switchTab('tab1')">1. Doc Reader & Classification</button>
+    <button class="tab" data-tab="tab2" onclick="switchTab('tab2')">2. Key Dates & Clauses</button>
+    <button class="tab" data-tab="tab3" onclick="switchTab('tab3')">3. VO & SOP Timer</button>
+    <button class="tab" data-tab="tab4" onclick="switchTab('tab4')">4. VO Organizer</button>
+    <button class="tab" data-tab="tab5" onclick="switchTab('tab5')">5. GCC/SCC Check & Calc</button>
   </nav>
 </header>
 
@@ -61,29 +65,32 @@
 <div id="modalContainer"></div>
 
 <script>
+// Setup PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
 // ==========================================
-// 1. 状态管理与持久化 (多项目支持)
+// 1. State Management
 // ==========================================
 let state = {
-  view: 'home', // 'home' or 'project'
+  view: 'home', 
   projects: JSON.parse(localStorage.getItem('qs_projects')) || [
-    { id: 'p1', name: 'Zung Fu Retail Project', contract: 'Enabling Works', ref: 'W/114105' }
+    { id: 'p1', name: 'Zung Fu Retail Project', contract: 'Enabling Works', ref: 'W/114105' },
+    { id: 'p2', name: 'Hospital Extension Phase 2', contract: 'Main Building Works', ref: 'W/998822' }
   ],
   currentProject: null,
-  file: null,
-  extractedText: '',
-  aiData: null, // 存放 AI 返回的 JSON 结构化数据
+  activeTab: 'tab1',
+  files: [], // { name, text, pages }
+  aiData: null, // Structured JSON from AI
   isAnalyzing: false
 };
 
 function saveProjects() { localStorage.setItem('qs_projects', JSON.stringify(state.projects)); }
 function loadCfg() { try { return JSON.parse(localStorage.getItem('qs_cfg') || '{}'); } catch { return {}; } }
 const $ = id => document.getElementById(id);
+const $$ = selector => document.querySelectorAll(selector);
 
 // ==========================================
-// 2. 路由渲染
+// 2. Routing & Rendering
 // ==========================================
 function render() {
   const nav = $('mainNav');
@@ -96,22 +103,28 @@ function render() {
   }
 }
 
-function goHome() { state.view = 'home'; state.currentProject = null; state.aiData = null; render(); }
+function goHome() { state.view = 'home'; state.currentProject = null; state.files = []; state.aiData = null; render(); }
 
 function openProject(id) {
   state.currentProject = state.projects.find(p => p.id === id);
   state.view = 'project';
-  state.file = null;
+  state.files = [];
   state.aiData = null;
-  state.extractedText = '';
-  switchTab('upload');
+  state.activeTab = 'tab1';
+  switchTab('tab1');
   render();
 }
 
-// --- Homepage (项目列表) ---
+function switchTab(tabId) {
+  state.activeTab = tabId;
+  $$('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
+  $$('.section').forEach(s => s.classList.toggle('active', s.id === tabId));
+}
+
+// --- Homepage ---
 function renderHome() {
   const cards = state.projects.map(p => `
-    <div class="card cursor-pointer hover:border-[#004AAD] transition" onclick="openProject('${p.id}')">
+    <div class="card cursor-pointer hover:border-[#004AAD] transition border-2 border-transparent" onclick="openProject('${p.id}')">
       <h3 class="font-bold text-lg text-slate-800">${p.name}</h3>
       <p class="text-xs text-slate-500 mt-1">${p.contract || 'No contract info'}</p>
       <p class="text-xs text-[#004AAD] font-mono mt-2">${p.ref || ''}</p>
@@ -125,7 +138,7 @@ function renderHome() {
     </div>
     <div class="grid md:grid-cols-3 gap-4">
       ${cards}
-      <div class="card border-dashed border-2 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 text-slate-500" onclick="openNewProjectModal()">
+      <div class="card border-dashed border-2 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 text-slate-500 min-h-[120px]" onclick="openNewProjectModal()">
         <span class="text-3xl mb-2">+</span>
         <span class="font-bold text-sm">New project</span>
       </div>
@@ -133,7 +146,7 @@ function renderHome() {
   `;
 }
 
-// --- Project View (Tabs) ---
+// --- Project View ---
 function renderProject() {
   const p = state.currentProject;
   $('appContainer').innerHTML = `
@@ -143,130 +156,180 @@ function renderProject() {
         <h2 class="text-2xl font-bold text-slate-900">${p.name}</h2>
         <p class="text-sm text-slate-500">${p.contract || ''} ${p.ref ? '· ' + p.ref : ''}</p>
       </div>
+      <div class="flex gap-2">
+        <button class="btn secondary" onclick="refreshProject()">🔄 Clear Project Files</button>
+      </div>
     </div>
 
-    <!-- TAB 1: Upload -->
-    <section id="upload" class="section active">
-      <div class="grid lg:grid-cols-2 gap-6">
+    <!-- TAB 1: Upload & Reader -->
+    <section id="tab1" class="section ${state.activeTab === 'tab1' ? 'active' : ''}">
+      <div class="grid lg:grid-cols-3 gap-6">
         <div class="card border-2 border-dashed border-[#004AAD] text-center py-10 cursor-pointer" onclick="$('fileInput').click()">
           <div class="text-4xl mb-2">📄</div>
-          <b class="text-sm text-slate-800">Click to upload or drag PDF here</b>
-          <p class="text-xs text-slate-500 mt-1">Extract text locally, then send to AI for rigid JSON parsing.</p>
-          <input type="file" id="fileInput" class="hidden" accept=".pdf" onchange="handleFile(this.files[0])">
+          <b class="text-sm text-slate-800">Click to upload PDF/TXT</b>
+          <p class="text-xs text-slate-500 mt-1">Upload GCC, SCC, VO, and AI docs.</p>
+          <input type="file" id="fileInput" class="hidden" accept=".pdf,.txt" multiple onchange="handleFiles(this.files)">
         </div>
-        <div class="card bg-[#004AAD] text-white space-y-3 flex flex-col justify-center">
-          <b class="text-xs uppercase tracking-wider text-[#CBE6F7]">Analysis Control</b>
-          <p class="text-xs text-slate-200">Run the AI analysis to populate the Dashboard, Search, and Timeline tabs.</p>
-          <div id="fileNameDisplay" class="text-sm font-bold truncate">No file selected</div>
-          <button id="btnAnalyze" class="btn bg-white text-[#004AAD] hover:bg-[#CBE6F7] w-full" onclick="runAIAnalysis()" disabled>Run AI Analysis</button>
-          <div id="progressLog" class="text-xs mt-2 text-[#CBE6F7]"></div>
+        <div class="card lg:col-span-2 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-center border-b pb-2 mb-3">
+              <h3 class="font-bold text-sm text-slate-800">Loaded Documents</h3>
+              <span class="bg-[#CBE6F7] text-[#004AAD] px-2 py-0.5 rounded text-xs font-bold" id="fileCount">0 files</span>
+            </div>
+            <ul id="fileList" class="space-y-2 text-sm max-h-48 overflow-y-auto mb-4">
+              <li class="text-slate-400 text-xs italic">No files uploaded yet.</li>
+            </ul>
+          </div>
+          <div class="bg-[#004AAD] p-4 rounded-lg text-white">
+            <b class="text-xs uppercase text-[#CBE6F7]">AI Analysis Engine</b>
+            <p class="text-xs text-slate-200 mt-1 mb-3">Sends text to AI to identify contract sections, dates, VOs, and GCC/SCC mappings.</p>
+            <button id="btnAnalyze" class="btn bg-white text-[#004AAD] w-full" onclick="runAIAnalysis()" disabled>Run AI Analysis</button>
+            <div id="progressLog" class="text-xs mt-2 text-[#CBE6F7] min-h-[20px]"></div>
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- TAB 2: Dashboard -->
-    <section id="results" class="section">
-      <div id="dashboardContent" class="text-center text-slate-500 py-10">
-        No data. Please upload a file and run AI analysis first.
-      </div>
+    <!-- TAB 2: Key Dates & Clauses -->
+    <section id="tab2" class="section ${state.activeTab === 'tab2' ? 'active' : ''}">
+      <div id="tab2Content" class="text-center text-slate-500 py-10">Run AI analysis in Tab 1 to view data.</div>
     </section>
 
-    <!-- TAB 3: Search -->
-    <section id="search" class="section">
-      <div class="card space-y-4">
-        <div class="flex gap-2">
-          <input id="query" class="input" placeholder="Search terms (e.g., Clause, HK$, 2026)">
-          <button class="btn" onclick="runSearch()">Filter & Highlight</button>
-        </div>
-        <div id="searchResults" class="text-xs space-y-2"></div>
-      </div>
+    <!-- TAB 3: VO & SOP Timer -->
+    <section id="tab3" class="section ${state.activeTab === 'tab3' ? 'active' : ''}">
+      <div id="tab3Content" class="text-center text-slate-500 py-10">Run AI analysis in Tab 1 to view data.</div>
     </section>
 
-    <!-- TAB 4: Timeline Calculator -->
-    <section id="deadline-calc" class="section">
-      <div class="grid lg:grid-cols-3 gap-6">
+    <!-- TAB 4: VO Organizer -->
+    <section id="tab4" class="section ${state.activeTab === 'tab4' ? 'active' : ''}">
+      <div id="tab4Content" class="text-center text-slate-500 py-10">Run AI analysis in Tab 1 to view data.</div>
+    </section>
+
+    <!-- TAB 5: GCC/SCC & Calc -->
+    <section id="tab5" class="section ${state.activeTab === 'tab5' ? 'active' : ''}">
+      <div class="grid lg:grid-cols-2 gap-6">
+        <div id="tab5Content" class="text-center text-slate-500 py-10">Run AI analysis to view GCC/SCC mappings.</div>
+        
+        <!-- Timeline Calculator -->
         <div class="card space-y-3">
-          <h3 class="font-bold text-sm border-b pb-2">Inputs (Auto-filled by AI if available)</h3>
+          <h3 class="font-bold text-sm border-b pb-2">Cap. 652 Timeline Calculator</h3>
           <label class="block text-xs font-bold text-slate-700">Claim Notice Date
             <input id="calcDate" type="date" class="input mt-1">
           </label>
           <label class="block text-xs font-bold text-slate-700">Response Period (Days)
             <select id="calcDays" class="input mt-1">
               <option value="30">30 Days (Cap. 652 Default)</option>
+              <option value="21">21 Days</option>
               <option value="14">14 Days</option>
             </select>
           </label>
           <button class="btn w-full" onclick="runCalculator()">Generate Timeline</button>
-        </div>
-        <div class="card lg:col-span-2">
-          <h3 class="font-bold text-sm border-b pb-2 mb-4">Cap. 652 Statutory Timeline</h3>
-          <div id="timelineOutput" class="text-xs text-slate-500">Awaiting calculation...</div>
+          <div id="timelineOutput" class="text-xs text-slate-500 mt-4"></div>
         </div>
       </div>
     </section>
-  `;
+  `);
 
-  // Bind Tab logic
-  document.querySelectorAll('.tab').forEach(b => b.onclick = () => switchTab(b.dataset.tab));
+  // Initialize file list UI
+  updateFileListUI();
 }
 
-function switchTab(tabId) {
-  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
-  document.querySelectorAll('.section').forEach(s => s.classList.toggle('active', s.id === tabId));
+function refreshProject() {
+  state.files = [];
+  state.aiData = null;
+  updateFileListUI();
+  renderProject();
 }
 
 // ==========================================
-// 3. 核心逻辑：PDF 提取与 AI 解析
+// 3. File Handling & AI Integration
 // ==========================================
-function handleFile(file) {
-  if (!file) return;
-  if (!file.name.toLowerCase().endsWith('.pdf')) return alert('Only PDF supported.');
-  state.file = file;
-  $('fileNameDisplay').innerText = file.name;
-  $('btnAnalyze').disabled = false;
-  $('progressLog').innerText = 'File ready.';
+async function handleFiles(fileList) {
+  for (const file of fileList) {
+    if (file.size > 50 * 1024 * 1024) { alert(file.name + ' is too large (max 50MB)'); continue; }
+    
+    let text = '', pages = 0;
+    try {
+      if (file.name.endsWith('.txt')) {
+        text = await file.text();
+      } else if (file.name.endsWith('.pdf')) {
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        pages = pdf.numPages;
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          text += content.items.map(x => x.str).join(' ') + '\n';
+        }
+      }
+      state.files.push({ name: file.name, text, pages });
+    } catch (e) {
+      alert('Error reading ' + file.name + ': ' + e.message);
+    }
+  }
+  updateFileListUI();
+}
+
+function updateFileListUI() {
+  $('fileCount').innerText = state.files.length + ' files';
+  if (state.files.length === 0) {
+    $('fileList').innerHTML = '<li class="text-slate-400 text-xs italic">No files uploaded yet.</li>';
+    $('btnAnalyze').disabled = true;
+  } else {
+    $('fileList').innerHTML = state.files.map(f => `
+      <li class="flex justify-between items-center bg-slate-50 p-2 rounded border">
+        <span class="truncate w-3/4" title="${f.name}">${f.name}</span>
+        <span class="text-xs text-slate-500">${f.pages ? f.pages + 'p' : 'txt'}</span>
+      </li>
+    `).join('');
+    $('btnAnalyze').disabled = false;
+  }
 }
 
 async function runAIAnalysis() {
-  if (!state.file || state.isAnalyzing) return;
+  if (state.files.length === 0 || state.isAnalyzing) return;
   const cfg = loadCfg();
   if (!cfg.endpoint || !cfg.apiKey || !cfg.model) return alert('Please configure API Settings first.');
 
   state.isAnalyzing = true;
-  const btn = $('btnAnalyze');
-  btn.disabled = true;
-  btn.innerText = 'Processing...';
-  
-  try {
-    // 1. 提取文本
-    $('progressLog').innerText = 'Step 1: Extracting text from PDF...';
-    const arrayBuffer = await state.file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-    let fullText = "";
-    // 限制页数防止 Token 爆炸
-    const maxPages = Math.min(pdf.numPages, 15); 
-    for (let i = 1; i <= maxPages; i++) {
-      const page = await pdf.getPage(i);
-      const content = await page.getTextContent();
-      fullText += content.items.map(item => item.str).join(" ") + "\n";
-    }
-    state.extractedText = fullText;
-    if (!fullText.trim()) throw new Error("PDF is empty or scanned image.");
+  $('btnAnalyze').disabled = true;
+  $('btnAnalyze').innerText = 'Processing...';
+  $('progressLog').innerText = 'Combining document texts...';
 
-    // 2. 构建极其严苛的 AI Prompt
-    $('progressLog').innerText = 'Step 2: AI is extracting structured data...';
-    
-    const systemPrompt = `You are an expert Quantity Surveyor and Legal Auditor under Hong Kong law.
-Analyze the provided document text and extract specific information.
-You MUST respond with a valid JSON object ONLY, formatted exactly as follows:
+  try {
+    // Combine text, limiting to ~40k characters to avoid API limits
+    let combinedText = state.files.map(f => `--- File: ${f.name} ---\n${f.text}`).join('\n\n');
+    if (combinedText.length > 40000) {
+      combinedText = combinedText.substring(0, 40000) + '\n\n[TRUNCATED DUE TO LENGTH]';
+      $('progressLog').innerText = 'Warning: Text truncated to 40k chars.';
+    }
+
+    $('progressLog').innerText = 'AI is extracting structured data...';
+
+    // VERY STRICT PROMPT
+    const systemPrompt = `You are an expert Quantity Surveyor and Legal Auditor in Hong Kong.
+Analyze the provided text which contains GCC, SCC, and VO documents.
+Extract information and YOU MUST RESPOND WITH A VALID RAW JSON OBJECT ONLY, no markdown blocks like \`\`\`json.
+Format exactly as follows:
 {
-  "clauses": [{"ref": "Clause Number", "title": "Short Title", "relevance": "Why it matters"}],
-  "dates": [{"date": "YYYY-MM-DD", "event": "Description of event (e.g., Claim Notice served)"}],
-  "amounts": [{"value": "HK$ 1,000", "desc": "What this amount is for"}],
-  "risks": ["Risk 1", "Risk 2"],
-  "summary": "A 2-sentence executive summary of the document."
+  "documents": [{"name": "Filename", "type": "GCC | SCC | VO | AI | Other", "summary": "Brief description"}],
+  "key_dates": [{"date": "YYYY-MM-DD", "event": "Description", "source": "Filename"}],
+  "key_clauses": [{"clause": "Clause Number", "source": "GCC | SCC | VO", "text": "Exact quote or summary", "impact": "Why it matters"}],
+  "vo_details": [
+    {
+      "vo_number": "VO-01",
+      "amount": "HK$ 1,000,000",
+      "date_issued": "YYYY-MM-DD",
+      "date_submitted": "YYYY-MM-DD",
+      "status": "Pending | Approved | Time-barred",
+      "sop_check": "Compliant | Overdue"
+    }
+  ],
+  "scc_gcc_mapping": [
+    {"scc_ref": "SCC 13", "gcc_ref": "GCC 13", "change": "Description of what was altered/deleted/added"}
+  ]
 }
-Do not include markdown blocks like \`\`\`json. Output raw JSON.`;
+If a section has no data, return an empty array [].`;
 
     let url = cfg.endpoint.replace(/\/$/, '');
     if (!url.endsWith('/chat/completions')) url = url.endsWith('/v1') ? url + '/chat/completions' : url + '/v1/chat/completions';
@@ -278,27 +341,30 @@ Do not include markdown blocks like \`\`\`json. Output raw JSON.`;
         model: cfg.model,
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: "Here is the document text:\n\n" + fullText }
+          { role: "user", content: "Here is the document text:\n\n" + combinedText }
         ],
-        temperature: 0.1 // 保持极低温度，确保格式稳定
+        temperature: 0.1 // Keep very low for JSON consistency
       })
     });
 
     const data = await response.json();
     if (!response.ok) throw new Error(data.error?.message || "API Error");
 
-    // 3. 解析 JSON 填补空白
     let rawContent = data.choices[0].message.content;
-    // 容错处理：如果 AI 还是带了 markdown 符号，强行剥离
+    // Strip markdown if AI ignores instructions
     rawContent = rawContent.replace(/```json/g, '').replace(/```/g, '').trim();
     
     state.aiData = JSON.parse(rawContent);
     
-    // 4. 更新 UI
+    // Render all tabs with new data
     renderDashboard();
-    autoFillTimeline();
-    switchTab('results');
-    $('progressLog').innerText = 'Analysis Complete!';
+    renderTab2();
+    renderTab3();
+    renderTab4();
+    renderTab5();
+    
+    $('progressLog').innerText = 'Analysis Complete! Check other tabs.';
+    switchTab('tab2'); // Automatically jump to results
 
   } catch (error) {
     console.error(error);
@@ -306,179 +372,190 @@ Do not include markdown blocks like \`\`\`json. Output raw JSON.`;
     alert('Analysis failed: ' + error.message);
   } finally {
     state.isAnalyzing = false;
-    btn.disabled = false;
-    btn.innerText = 'Re-run AI Analysis';
+    $('btnAnalyze').disabled = false;
+    $('btnAnalyze').innerText = 'Re-run AI Analysis';
   }
 }
 
 // ==========================================
-// 4. 渲染看板与填充数据
+// 4. Render Tabs Based on AI Data
 // ==========================================
 function renderDashboard() {
   const d = state.aiData;
   if (!d) return;
 
-  const clauseHtml = d.clauses.map(c => `
-    <div class="p-3 border-l-4 border-[#004AAD] bg-slate-50 mb-2">
-      <b class="text-[#004AAD]">${c.ref}</b> - <span class="font-bold">${c.title}</span>
-      <p class="text-slate-600 mt-1">${c.relevance}</p>
+  const docList = d.documents.map(doc => `
+    <div class="flex items-center justify-between p-3 border-b last:border-0">
+      <div>
+        <b class="text-slate-800 block text-sm">${doc.name}</b>
+        <span class="text-xs text-slate-500">${doc.summary}</span>
+      </div>
+      <span class="bg-[#004AAD] text-white px-2 py-1 rounded text-[10px] font-bold uppercase">${doc.type}</span>
     </div>
   `).join('');
 
-  const dateHtml = d.dates.map(dt => `
-    <div class="flex justify-between py-1 border-b border-slate-100">
-      <span class="font-mono text-[#004AAD] font-bold">${dt.date}</span>
-      <span class="text-slate-600 text-right">${dt.event}</span>
-    </div>
-  `).join('');
-
-  const amountHtml = d.amounts.map(a => `
-    <span class="inline-block bg-emerald-100 text-emerald-800 font-bold px-2 py-1 rounded mr-2 mb-2">${a.value} <span class="font-normal text-xs">(${a.desc})</span></span>
-  `).join('');
-
-  const riskHtml = d.risks.map(r => `
-    <li class="text-red-700 ml-4 list-disc">${r}</li>
-  `).join('');
-
-  $('dashboardContent').innerHTML = `
-    <div class="grid md:grid-cols-2 gap-6">
-      <!-- Left: Executive Summary -->
-      <div class="space-y-6">
-        <div class="card bg-[#004AAD] text-white">
-          <h3 class="text-xs uppercase text-[#CBE6F7] font-bold mb-2">AI Executive Summary</h3>
-          <p class="text-sm leading-relaxed">${d.summary}</p>
-        </div>
-        <div class="card">
-          <h3 class="font-bold text-sm border-b pb-2 mb-3 text-slate-800">Extracted Amounts</h3>
-          <div>${amountHtml || '<span class="text-slate-400 text-xs">None found</span>'}</div>
-        </div>
-        <div class="card">
-          <h3 class="font-bold text-sm border-b pb-2 mb-3 text-slate-800">Risk Flags</h3>
-          <ul class="space-y-2">${riskHtml || '<li class="text-slate-400 text-xs">None found</li>'}</ul>
-        </div>
-      </div>
-
-      <!-- Right: Clauses & Dates -->
-      <div class="space-y-6">
-        <div class="card">
-          <h3 class="font-bold text-sm border-b pb-2 mb-3 text-slate-800">Key Clauses</h3>
-          ${clauseHtml || '<span class="text-slate-400 text-xs">None found</span>'}
-        </div>
-        <div class="card">
-          <h3 class="font-bold text-sm border-b pb-2 mb-3 text-slate-800">Timeline Events</h3>
-          ${dateHtml || '<span class="text-slate-400 text-xs">None found</span>'}
-        </div>
-      </div>
+  $('tab1').innerHTML += `
+    <div class="card mt-6">
+      <h3 class="font-bold text-sm border-b pb-2 mb-3 text-slate-800">AI Document Classification</h3>
+      ${docList || '<span class="text-slate-400 text-xs">No documents classified.</span>'}
     </div>
   `;
 }
 
-// 自动填充计算器
-function autoFillTimeline() {
+function renderTab2() {
   const d = state.aiData;
-  if (d && d.dates && d.dates.length > 0) {
-    // 找最早的日期作为通知日期
-    const sortedDates = d.dates.map(x => x.date).sort();
-    const earliest = sortedDates[0];
-    if (earliest) {
-      $('calcDate').value = earliest;
-      runCalculator();
-    }
-  }
-}
+  if (!d) return;
 
-function runCalculator() {
-  const dateVal = $('calcDate').value;
-  if (!dateVal) return;
-  const days = parseInt($('calcDays').value);
-  
-  const start = new Date(dateVal);
-  const deadline = new Date(start);
-  deadline.setDate(deadline.getDate() + days);
-  
-  const today = new Date();
-  const diffTime = deadline - today;
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const dateHtml = d.key_dates.map(dt => `
+    <li class="flex justify-between py-2 border-b last:border-0 text-sm">
+      <span class="font-mono text-[#004AAD] font-bold w-24 shrink-0">${dt.date}</span>
+      <span class="text-slate-700 flex-1">${dt.event}</span>
+      <span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded">${dt.source}</span>
+    </li>
+  `).join('');
 
-  const isOverdue = diffDays < 0;
-  const colorClass = isOverdue ? 'text-red-600' : 'text-emerald-600';
-
-  $('timelineOutput').innerHTML = `
-    <div class="space-y-6">
-      <div class="p-4 rounded-lg border ${isOverdue ? 'bg-red-50 border-red-200' : 'bg-emerald-50 border-emerald-200'}">
-        <div class="text-sm font-bold ${colorClass}">
-          ${isOverdue ? '❌ RESPONSE OVERDUE' : '✔ ' + diffDays + ' DAYS REMAINING'}
-        </div>
-        <p class="text-xs text-slate-600 mt-1">
-          Statutory Deadline: <b>${deadline.toISOString().split('T')[0]}</b>
-        </p>
+  const clauseHtml = d.key_clauses.map(c => `
+    <div class="p-3 border-l-4 border-[#004AAD] bg-slate-50 mb-2 text-sm">
+      <div class="flex justify-between mb-1">
+        <b class="text-[#004AAD]">${c.source} - ${c.clause}</b>
       </div>
+      <p class="text-slate-800 font-medium mb-1">${c.text}</p>
+      <p class="text-slate-500 text-xs">Impact: ${c.impact}</p>
+    </div>
+  `).join('');
 
-      <div class="relative border-l-2 border-[#004AAD] ml-3 pl-6 space-y-8">
-        <!-- Event 1 -->
-        <div class="relative">
-          <div class="absolute -left-[31px] top-0 bg-[#004AAD] text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold">1</div>
-          <b class="text-slate-800 text-sm block">Payment Claim Received</b>
-          <span class="text-[#004AAD] font-mono text-xs font-bold">${start.toISOString().split('T')[0]}</span>
-        </div>
-        
-        <!-- Event 2 -->
-        <div class="relative">
-          <div class="absolute -left-[31px] top-0 ${isOverdue ? 'bg-red-500' : 'bg-amber-500'} text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold">2</div>
-          <b class="text-slate-800 text-sm block">Payment Response Deadline</b>
-          <span class="text-amber-600 font-mono text-xs font-bold">${deadline.toISOString().split('T')[0]}</span>
-        </div>
-
-        <!-- Event 3 -->
-        <div class="relative">
-          <div class="absolute -left-[31px] top-0 bg-slate-400 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold">3</div>
-          <b class="text-slate-800 text-sm block">Adjudication Window Opens</b>
-          <span class="text-slate-500 font-mono text-xs">${deadline.toISOString().split('T')[0]} onward</span>
-        </div>
+  $('tab2Content').innerHTML = `
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="card">
+        <h3 class="font-bold text-sm border-b pb-2 mb-3 text-slate-800">Highlighted Key Dates</h3>
+        <ul>${dateHtml || '<li class="text-slate-400 text-xs">No dates found.</li>'}</ul>
+      </div>
+      <div class="card">
+        <h3 class="font-bold text-sm border-b pb-2 mb-3 text-slate-800">Key Clauses & Alterations</h3>
+        ${clauseHtml || '<span class="text-slate-400 text-xs">No clauses found.</span>'}
       </div>
     </div>
   `;
 }
 
-// ==========================================
-// 5. 搜索功能
-// ==========================================
-function runSearch() {
-  const q = $('query').value.trim();
-  if (!q) return;
-  if (!state.extractedText) return alert('Upload and analyze a file first.');
-
-  const text = state.extractedText;
-  const lowText = text.toLowerCase();
-  const needle = q.toLowerCase();
+function renderTab3() {
+  const d = state.aiData;
+  if (!d) return;
   
-  let pos = 0, n = 0;
-  let results = '';
-  
-  while ((pos = lowText.indexOf(needle, pos)) !== -1 && n < 10) {
-    let start = Math.max(0, pos - 80);
-    let end = Math.min(text.length, pos + q.length + 100);
-    let snippet = text.slice(start, end).replace(/\s+/g, ' ');
-    
-    // 简单的正则高亮
-    let highlighted = snippet.replace(new RegExp(q, 'gi'), match => `<mark class="hl-query">${match}</mark>`);
-    // 高亮日期
-    highlighted = highlighted.replace(/\b\d{4}-\d{2}-\d{2}\b/g, match => `<mark class="hl-date">${match}</mark>`);
-
-    results += `<div class="source">...${highlighted}...</div>`;
-    pos += needle.length;
-    n++;
+  // Auto-fill calc if dates exist
+  if (d.key_dates && d.key_dates.length > 0) {
+    const sorted = [...d.key_dates].sort((a,b) => new Date(a.date) - new Date(b.date));
+    $('calcDate').value = sorted[0].date;
+    runCalculator();
   }
 
-  $('searchResults').innerHTML = n > 0 ? results : '<span class="text-slate-500">No matches found.</span>';
+  const voHtml = d.vo_details.map(vo => `
+    <div class="card mb-4 border-l-4 ${vo.sop_check === 'Overdue' ? 'border-red-500' : 'border-emerald-500'}">
+      <div class="flex justify-between items-start mb-2">
+        <div>
+          <h4 class="font-bold text-slate-800 text-lg">${vo.vo_number}</h4>
+          <span class="text-xs text-slate-500">Issued: ${vo.date_issued} | Submitted: ${vo.date_submitted}</span>
+        </div>
+        <span class="bg-slate-100 text-slate-700 font-bold px-3 py-1 rounded">${vo.amount}</span>
+      </div>
+      <div class="flex gap-2 text-xs mt-3">
+        <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded font-bold">Status: ${vo.status}</span>
+        <span class="${vo.sop_check === 'Overdue' ? 'bg-red-100 text-red-800' : 'bg-emerald-100 text-emerald-800'} px-2 py-1 rounded font-bold">SOP Timer: ${vo.sop_check}</span>
+      </div>
+    </div>
+  `).join('');
+
+  $('tab3Content').innerHTML = `
+    <div class="mb-4">
+      <h2 class="text-xl font-bold text-slate-900">VO Verification & SOP Timer</h2>
+      <p class="text-sm text-slate-500">Checks VO submission against SCC time-bars and Cap. 652.</p>
+    </div>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div>
+        ${voHtml || '<div class="card text-slate-400 text-sm">No VO details found.</div>'}
+      </div>
+      <div class="card">
+         <h3 class="font-bold text-sm border-b pb-2 mb-3 text-slate-800">Required Actions</h3>
+         <ul class="text-sm space-y-2 text-slate-700">
+           ${d.vo_details.some(v => v.sop_check === 'Overdue') 
+              ? '<li class="text-red-600 font-bold">⚠️ Warning: One or more VOs exceed the statutory response period.</li>' 
+              : '<li class="text-emerald-600 font-bold">✔ All extracted VOs appear within time limits.</li>'}
+           <li>Review SCC 28.2 for detailed claim particulars.</li>
+           <li>Ensure VO responses are served within 30 days of submission.</li>
+         </ul>
+      </div>
+    </div>
+  `;
+}
+
+function renderTab4() {
+  const d = state.aiData;
+  if (!d) return;
+
+  const accordion = d.vo_details.map(vo => `
+    <details>
+      <summary>
+        <div class="flex justify-between w-full pr-4">
+          <span>${vo.vo_number} - ${vo.amount}</span>
+          <span class="text-xs text-slate-500">${vo.date_issued}</span>
+        </div>
+      </summary>
+      <div class="detail-content">
+        <table class="w-full text-left border-collapse">
+          <tr class="border-b"><th class="py-1 text-slate-500 font-normal w-1/3">Amount</th><td class="font-bold">${vo.amount}</td></tr>
+          <tr class="border-b"><th class="py-1 text-slate-500 font-normal">Date Issued</th><td>${vo.date_issued}</td></tr>
+          <tr class="border-b"><th class="py-1 text-slate-500 font-normal">Date Submitted</th><td>${vo.date_submitted}</td></tr>
+          <tr class="border-b"><th class="py-1 text-slate-500 font-normal">Status</th><td>${vo.status}</td></tr>
+          <tr><th class="py-1 text-slate-500 font-normal">SOP Check</th><td class="${vo.sop_check === 'Overdue' ? 'text-red-600 font-bold' : 'text-emerald-600 font-bold'}">${vo.sop_check}</td></tr>
+        </table>
+      </div>
+    </details>
+  `).join('');
+
+  $('tab4Content').innerHTML = `
+    <div class="mb-4">
+      <h2 class="text-xl font-bold text-slate-900">VO Organizer</h2>
+      <p class="text-sm text-slate-500">Expand VOs to compare details side-by-side.</p>
+    </div>
+    <div class="space-y-2">
+      ${accordion || '<div class="text-slate-400 text-sm">No VOs found.</div>'}
+    </div>
+  `;
+}
+
+function renderTab5() {
+  const d = state.aiData;
+  if (!d) return;
+
+  const mapHtml = d.scc_gcc_mapping.map(m => `
+    <div class="flex gap-4 p-3 border-b last:border-0 text-sm items-start">
+      <div class="w-1/3 shrink-0">
+        <span class="bg-blue-100 text-blue-800 font-bold px-2 py-1 rounded block text-center mb-1">${m.scc_ref}</span>
+      </div>
+      <div class="text-slate-400 pt-1">➔</div>
+      <div class="w-1/3 shrink-0">
+        <span class="bg-slate-100 text-slate-800 font-bold px-2 py-1 rounded block text-center mb-1">${m.gcc_ref}</span>
+      </div>
+      <div class="flex-1 text-xs text-slate-600 mt-1">
+        <b>Change:</b> ${m.change}
+      </div>
+    </div>
+  `).join('');
+
+  $('tab5Content').innerHTML = `
+    <div class="card mb-6">
+      <h3 class="font-bold text-sm border-b pb-2 mb-3 text-slate-800">SCC to GCC Mapping (Highlighting Alterations)</h3>
+      ${mapHtml || '<span class="text-slate-400 text-xs">No mappings identified.</span>'}
+    </div>
+  `;
 }
 
 // ==========================================
-// 6. 模态框 & 设置
+// 5. Utilities & Modals
 // ==========================================
 function openNewProjectModal() {
   $('modalContainer').innerHTML = `
-    <div class="overlay" onclick="if(event.target===this)this.remove()">
+    <div class="overlay" onclick="if(event.target===this)$('modalContainer').innerHTML=''">
       <div class="modal">
         <h3 class="font-bold text-lg mb-4">Create New Project</h3>
         <div class="space-y-3 text-sm">
@@ -510,10 +587,10 @@ function createProject() {
   renderHome();
 }
 
-function openSettings() {
+function openSettingsModal() {
   const c = loadCfg();
   $('modalContainer').innerHTML = `
-    <div class="overlay" onclick="if(event.target===this)this.remove()">
+    <div class="overlay" onclick="if(event.target===this)$('modalContainer').innerHTML=''">
       <div class="modal">
         <h3 class="font-bold text-lg mb-1">API Settings</h3>
         <p class="text-xs text-slate-500 mb-4">Key is saved locally in this browser.</p>
@@ -542,7 +619,47 @@ function saveSettings() {
   alert('Settings Saved!');
 }
 
-// 启动
+function runCalculator() {
+  const dateVal = $('calcDate').value;
+  if (!dateVal) return;
+  const days = parseInt($('calcDays').value);
+  
+  const start = new Date(dateVal);
+  const deadline = new Date(start);
+  deadline.setDate(deadline.getDate() + days);
+  
+  const today = new Date();
+  const diffTime = deadline - today;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  const isOverdue = diffDays < 0;
+  const colorClass = isOverdue ? 'text-red-600' : 'text-emerald-600';
+
+  $('timelineOutput').innerHTML = `
+    <div class="p-4 rounded-lg border ${isOverdue ? 'bg-red-50 border-red-200' : 'bg-emerald-50 border-emerald-200'} mb-4">
+      <div class="text-sm font-bold ${colorClass}">
+        ${isOverdue ? '❌ RESPONSE OVERDUE' : '✔ ' + diffDays + ' DAYS REMAINING'}
+      </div>
+      <p class="text-xs text-slate-600 mt-1">
+        Statutory Deadline: <b>${deadline.toISOString().split('T')[0]}</b>
+      </p>
+    </div>
+    <div class="relative border-l-2 border-[#004AAD] ml-3 pl-6 space-y-6">
+      <div class="relative">
+        <div class="absolute -left-[31px] top-0 bg-[#004AAD] text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold">1</div>
+        <b class="text-slate-800 text-sm block">Payment Claim Received</b>
+        <span class="text-[#004AAD] font-mono text-xs font-bold">${start.toISOString().split('T')[0]}</span>
+      </div>
+      <div class="relative">
+        <div class="absolute -left-[31px] top-0 ${isOverdue ? 'bg-red-500' : 'bg-amber-500'} text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold">2</div>
+        <b class="text-slate-800 text-sm block">Payment Response Deadline</b>
+        <span class="text-amber-600 font-mono text-xs font-bold">${deadline.toISOString().split('T')[0]}</span>
+      </div>
+    </div>
+  `;
+}
+
+// Start
 render();
 </script>
 </body>
